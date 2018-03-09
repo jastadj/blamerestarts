@@ -6,6 +6,7 @@
 
 #include <SFML\Graphics.hpp>
 #include "spritesheet.hpp"
+#include "particle.hpp"
 
 class Blame
 {
@@ -20,6 +21,8 @@ private:
 
     // assets
     SpriteSheet *sstest;
+    ParticleManager *m_ParticleManager;
+
 
     // render window
     sf::RenderWindow *m_Screen;
