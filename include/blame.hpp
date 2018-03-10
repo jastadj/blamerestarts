@@ -3,10 +3,13 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <math.h>
+#include <time.h>
 
 #include <SFML\Graphics.hpp>
 #include "spritesheet.hpp"
 #include "particle.hpp"
+#include "player.hpp"
 
 class Blame
 {
@@ -24,10 +27,21 @@ private:
     ParticleManager *m_ParticleManager;
 
 
+    // game data
+    Player *m_Player;
+    time_t m_Seed;
+    std::vector<GameOBJ*> m_GameObjects;
+
+
     // render window
+    unsigned int m_ScreenWidth;
+    unsigned int m_ScreenHeight;
     sf::RenderWindow *m_Screen;
+    sf::View m_View;
+    double m_DeltaTime;
 
     // main loop
+    void newGame();
     void mainLoop();
 
 public:
@@ -41,5 +55,11 @@ public:
 
         return m_Instance;
     }
+
+    time_t getSeed() { return m_Seed;}
+    int32_t getDeltaTime() { return m_DeltaTime;}
+
+    bool registerGameOBJ(GameOBJ *tobj);
+    bool destroyGameOBJ(GameOBJ *tobj);
 };
 #endif // CLASS_BLAME

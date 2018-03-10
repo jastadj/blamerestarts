@@ -38,6 +38,9 @@ bool SpriteSheet::initSpriteSheet(std::string filename, int tiles_x, int tiles_y
     // create texture from image
     m_texture.loadFromImage(m_image);
 
+    // disable smoothing
+    m_texture.setSmooth(false);
+
     // create flipped image
     m_image.flipHorizontally();
     m_texture_flipped.loadFromImage(m_image);

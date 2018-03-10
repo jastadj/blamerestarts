@@ -1,22 +1,33 @@
 #ifndef CLASS_GAMEOBJ
 #define CLASS_GAMEOBJ
 
+#include <vector>
 #include <SFML\Graphics.hpp>
-#include "spritesheet.hpp"
+
+// forward dec
+class Blame;
 
 // base class for all game objects
-
 class GameOBJ
 {
 protected:
 
-    SpriteSheet *m_SpriteSheet;
+    Blame *m_BlameCallback;
+
+    // sprite
+    std::vector<sf::Sprite*> m_Sprites;
+    int m_SpriteState;
 
 public:
     GameOBJ();
     virtual ~GameOBJ();
 
-    virtual void update();
-    void draw(sf::RenderTarget *tscreen);
+    // properties
+    sf::Vector2f m_Position;
+    sf::Vector2f m_Vel;
+    sf::Vector2f m_Accel;
+
+    virtual void update()=0;
+    virtual void draw(sf::RenderTarget *tscreen);
 };
 #endif // CLASS_GAMEOBJ
