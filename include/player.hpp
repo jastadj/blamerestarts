@@ -33,6 +33,7 @@ private:
     sf::Vector2f m_VelCutoff;
     float m_Gravity;
     float m_Friction;
+    bool m_OnGround;
 
 public:
     Player();

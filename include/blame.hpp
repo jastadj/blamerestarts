@@ -75,7 +75,7 @@ public:
     bool registerGameOBJ(GameOBJ *tobj);
     bool destroyGameOBJ(GameOBJ *tobj);
 
-    std::vector< sf::Vector2i > getMapCollision(GameOBJ *tobj);
+    Tile *getMapCollision(GameOBJ *tobj);
 
     // if in debug mode, draw this text to the screen
     sf::Text *dbg_txt;

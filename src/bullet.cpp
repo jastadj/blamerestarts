@@ -51,9 +51,7 @@ void Bullet::update()
     m_Position += sf::Vector2f(m_Vel.x * dt, m_Vel.y * dt);
 
     // check map collisions
-    // check map collision
-    mapcol = m_BlameCallback->getMapCollision(this);
-    if(!mapcol.empty())
+    if(m_BlameCallback->getMapCollision(this))
     {
         /*
         // debug

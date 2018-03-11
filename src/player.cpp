@@ -51,6 +51,7 @@ Player::Player()
     m_MaxAccel = sf::Vector2f(1.0, 1.0);
     m_Friction = 0.05;
     m_Gravity = 0.3;
+    m_OnGround = false;
 
     // randomize starting wheel rotation
     m_LeftWheelRot = rand()%360;
@@ -84,8 +85,11 @@ void Player::shoot()
 void Player::update()
 {
     int32_t dt = m_BlameCallback->getDeltaTime();
-    std::vector< sf::Vector2i > mapcol;
+    Tile *coltile = NULL;
+    sf::Vector2f startpos = m_Position;
+    sf::Vector2f startvel = m_Vel;
 
+    // UPDATE X AXIS POS/VEL/ACCEL
     // if driving, add acceleration
     if(m_Drive != 0)
     {
@@ -104,15 +108,14 @@ void Player::update()
     }
     else m_Accel.x = 0;
 
-    // add gravitational acceleration
-    m_Accel.y += m_Gravity;
 
     // clip acceleration
     if(m_Accel.x > m_MaxAccel.x) m_Accel.x = m_MaxAccel.x;
     else if(m_Accel.x < -m_MaxAccel.x) m_Accel.x = -m_MaxAccel.x;
 
-    // update velocity from acceleration
-    m_Vel += m_Accel;
+
+    // update velocity from acceleration in x-axis
+    m_Vel.x += m_Accel.x;
 
     // if not applying drive, add deceleration / friction
     if(m_Drive == 0)
@@ -136,53 +139,55 @@ void Player::update()
     // clip velocity at terminal vel
     if(m_Vel.x > m_TerminalVel.x) m_Vel.x = m_TerminalVel.x;
     else if(m_Vel.x < -m_TerminalVel.x) m_Vel.x = -m_TerminalVel.x;
+
+
+    // check x-axis map collision and respond
+    m_Position.x += m_Vel.x;
+    m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+    coltile = m_BlameCallback->getMapCollision(this);
+    if(coltile)
+    {
+        // if moving rightward
+        if(m_Vel.x > 0)
+        {
+            // push out to just touch the surface
+            m_Position.x -= (m_BoundingBox.left + m_BoundingBox.width) - coltile->boundingbox.left;
+            m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+        }
+        // moving leftward
+        else if(m_Vel.x < 0)
+        {
+            // push out to just touch the surface
+            m_Position.x += (coltile->boundingbox.left + coltile->boundingbox.width) - m_BoundingBox.left;
+            m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+        }
+    }
+
+    // UPDATE Y-AXIS POS/VEL/ACCEL
+    // add gravitational acceleration
+    m_Accel.y += m_Gravity;
+
+    // clip max acceleration in y-axis
+    if(m_Accel.y > m_MaxAccel.y) m_Accel.y = m_MaxAccel.y;
+    else if(m_Accel.y < -m_MaxAccel.y) m_Accel.y = -m_MaxAccel.y;
+
+    // update velocity from acceleration in y-axis
+    m_Vel.y += m_Accel.y;
     if(m_Vel.y > m_TerminalVel.y) m_Vel.y = m_TerminalVel.y;
     else if(m_Vel.y < -m_TerminalVel.y) m_Vel.y = -m_TerminalVel.y;
 
-    // update position from velocity
-    m_Position += m_Vel;
-
-    // update bounding box position
-    m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+    // check y-axis map collision and respond
+    m_Position.y += m_Vel.y;
     m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
-
-    // check map collision
-    mapcol = m_BlameCallback->getMapCollision(this);
-    if(!mapcol.empty())
+    coltile = m_BlameCallback->getMapCollision(this);
+    if(coltile)
     {
-
-        // if collided while moving left
-        if(m_Vel.x < 0)
+        // if moving downward
+        if(m_Vel.y > 0)
         {
-            for(int i = 0; i < int(mapcol.size()); i++)
-            {
-                if( mapcol[i].x * TILE_SIZE + TILE_SIZE > m_BoundingBox.left)
-                {
-                    m_Position.x += (mapcol[i].x * TILE_SIZE + TILE_SIZE) - m_BoundingBox.left;
-                    m_Vel.x = 0;
-                    m_Accel.x = 0;
-                    break;
-                }
-            }
+            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top;
+            m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
         }
-        // if collided while moving right
-        else if(m_Vel.x > 0)
-        {
-            for(int i = 0; i < int(mapcol.size()); i++)
-            {
-                if( mapcol[i].x * TILE_SIZE < m_BoundingBox.left + m_BoundingBox.width)
-                {
-                    m_Position.x -= m_BoundingBox.left + m_BoundingBox.width - (mapcol[i].x * TILE_SIZE);
-                    m_Vel.x = 0;
-                    m_Accel.x = 0;
-                    break;
-                }
-            }
-        }
-
-        // re-update bounding box
-        m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
-        m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
     }
 
     // debug info

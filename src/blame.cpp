@@ -295,14 +295,14 @@ void Blame::drawRect(sf::FloatRect trect)
 
 }
 
-std::vector< sf::Vector2i > Blame::getMapCollision(GameOBJ *tobj)
+Tile *Blame::getMapCollision(GameOBJ *tobj)
 {
     std::vector< sf::Vector2i > col;
 
     if(!tobj)
     {
         std::cout << "Error in getMapCollision, target object is null!\n";
-        return col;
+        return NULL;
     }
 
     sf::Vector2i p1( int(floor(tobj->m_BoundingBox.left/TILE_SIZE)),
@@ -318,9 +318,9 @@ std::vector< sf::Vector2i > Blame::getMapCollision(GameOBJ *tobj)
             Tile *ttile = m_CurrentLevel->getTile(n,i);
 
             if(ttile)
-                if(ttile->blocked) col.push_back(sf::Vector2i(n,i));
+                if(ttile->blocked) return ttile;
         }
     }
 
-    return col;
+    return NULL;
 }
