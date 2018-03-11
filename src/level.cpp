@@ -84,4 +84,10 @@ void Level::genLevel()
 
     for(int i = 0; i < int(m_Width); i++) setTile(m_Width-1, i, 1);
 
+    setTile(5,5,1);
+    setTile(5,4,1);
+    setTile(5,3,1);
+    setTile(5,2,1);
+    setTile(5,1,1);
+
 }

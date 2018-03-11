@@ -205,6 +205,7 @@ void Blame::mainLoop()
                     // particle test
                     //p1.createParticle(sf::Vector2f(0,0), sf::Vector2f(1,-0.7));
                     m_Player->shoot();
+                    std::cout << "test\n";
                 }
             }
         }
@@ -318,7 +319,14 @@ Tile *Blame::getMapCollision(GameOBJ *tobj)
             Tile *ttile = m_CurrentLevel->getTile(n,i);
 
             if(ttile)
-                if(ttile->blocked) return ttile;
+            {
+                if(ttile->blocked)
+                {
+                    std::cout << "Colliding!\n";
+                    return ttile;
+                }
+            }
+
         }
     }
 

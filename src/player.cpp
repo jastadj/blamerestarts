@@ -86,6 +86,11 @@ void Player::update()
 {
     int32_t dt = m_BlameCallback->getDeltaTime();
     Tile *coltile = NULL;
+    //m_Position.x = floor(m_Position.x);
+    //m_Position.y = floor(m_Position.y);
+    //m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+    //m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+
     sf::Vector2f startpos = m_Position;
     sf::Vector2f startvel = m_Vel;
 
@@ -151,7 +156,9 @@ void Player::update()
         if(m_Vel.x > 0)
         {
             // push out to just touch the surface
-            m_Position.x -= (m_BoundingBox.left + m_BoundingBox.width) - coltile->boundingbox.left;
+            // note : for some reason, the exact values were still detecting ocllision when pushing away
+            // so adding a 0.1 offset seems to have corrected this
+            m_Position.x -= (m_BoundingBox.left + m_BoundingBox.width) - coltile->boundingbox.left + 0.01;
             m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
         }
         // moving leftward
@@ -163,6 +170,8 @@ void Player::update()
         }
     }
 
+    // test
+    m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
     // UPDATE Y-AXIS POS/VEL/ACCEL
     // add gravitational acceleration
     m_Accel.y += m_Gravity;
@@ -185,10 +194,19 @@ void Player::update()
         // if moving downward
         if(m_Vel.y > 0)
         {
-            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top;
+            // push out to just touch the surface
+            // note : for some reason, the exact values were still detecting ocllision when pushing away
+            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top + 0.1;
+            m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+        }
+        else if(m_Vel.y < 0)
+        {
+            m_Position.y += (coltile->boundingbox.top + coltile->boundingbox.height) - m_BoundingBox.top;
             m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
         }
     }
+
+
 
     // debug info
     std::stringstream dbgss;
