@@ -133,7 +133,7 @@ void Blame::newGame()
     m_Levels.clear();
 
     // init player
-    m_Player = new Player();
+    m_Player = new Player( sf::Vector2f(100,100) );
     //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
 
     // clear any existing particles
@@ -158,9 +158,6 @@ void Blame::mainLoop()
     //p1.m_custom_color = sf::Color(236,191,44,255);
     p1.m_custom_accel = sf::Vector2f(0, 0.05);
     */
-
-    // test player position
-    m_Player->m_Position = sf::Vector2f(100,100);
 
     // zoom in view
     m_View.zoom(0.5);
@@ -195,6 +192,7 @@ void Blame::mainLoop()
             {
                 if(event.key.code == sf::Keyboard::Escape) quit = true;
                 else if(event.key.code == sf::Keyboard::F1) m_DebugMode = !m_DebugMode;
+                else if(event.key.code == sf::Keyboard::Space) m_Player->jump();
             }
             // if mouse button pressed
             else if(event.type == sf::Event::MouseButtonPressed)
@@ -298,31 +296,35 @@ void Blame::drawRect(sf::FloatRect trect)
 
 Tile *Blame::getMapCollision(GameOBJ *tobj)
 {
-    std::vector< sf::Vector2i > col;
-
     if(!tobj)
     {
         std::cout << "Error in getMapCollision, target object is null!\n";
         return NULL;
     }
 
+    // map array "tile number" range for top left and bottom right
+    // these are used to scan each occupied tile by the game object
     sf::Vector2i p1( int(floor(tobj->m_BoundingBox.left/TILE_SIZE)),
                      int(floor(tobj->m_BoundingBox.top/TILE_SIZE)) );
     sf::Vector2i p2( int(floor( (tobj->m_BoundingBox.left + tobj->m_BoundingBox.width)/TILE_SIZE ) ),
                      int(floor( (tobj->m_BoundingBox.top + tobj->m_BoundingBox.height)/TILE_SIZE) ) );
 
 
+    // go through each occupied tile by the game obj and determine if its a "blocked" tile
     for(int i = p1.y; i <= p2.y; i++)
     {
         for(int n = p1.x; n <= p2.x; n++)
         {
+            // the one of the occupied tiles from the current level
             Tile *ttile = m_CurrentLevel->getTile(n,i);
 
+            // successfully retrieved map tile
             if(ttile)
             {
+                // tile is blocked (can't pass through)
                 if(ttile->blocked)
                 {
-                    std::cout << "Colliding!\n";
+                    // return this tile
                     return ttile;
                 }
             }
@@ -330,5 +332,6 @@ Tile *Blame::getMapCollision(GameOBJ *tobj)
         }
     }
 
+    // all tiles non blocked
     return NULL;
 }

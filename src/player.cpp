@@ -8,7 +8,7 @@ SpriteSheet *Player::m_ChassisSS = new SpriteSheet(".\\data\\art\\chassis.png");
 SpriteSheet *Player::m_TurretSS = new SpriteSheet(".\\data\\art\\turret.png", 1, 3);
 SpriteSheet *Player::m_WheelSS = new SpriteSheet(".\\data\\art\\wheel.png");
 
-Player::Player()
+Player::Player(sf::Vector2f tpos)
 {
     // create sprites
     if(m_ChassisSS->initialized())
@@ -47,21 +47,25 @@ Player::Player()
     m_TurretSpeed = 0.01f;
     m_Drive = 0; // -1 left, 1 right, 0 stopped
     m_TerminalVel = sf::Vector2f(3, 3);
-    m_VelCutoff = sf::Vector2f(0.3, 0.3);
+    m_VelCutoff = sf::Vector2f(0.3, 0.5);
     m_MaxAccel = sf::Vector2f(1.0, 1.0);
     m_Friction = 0.05;
-    m_Gravity = 0.3;
+    m_Gravity = 0.002;
     m_OnGround = false;
+    m_JumpForce = 3.0f;
 
     // randomize starting wheel rotation
     m_LeftWheelRot = rand()%360;
     m_RightWheelRot = rand()%360;
 
+    m_Position = tpos;
+
     // init bounding box
     m_BoundingBox.width = 44;
     m_BoundingBox.height = 32;
     m_BoundingBoxOffset = sf::Vector2f(-24, -18);
-
+    m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+    m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
 
 }
 
@@ -80,6 +84,15 @@ void Player::shoot()
     if(m_TurretPosition == 1) newbullet = new Bullet(m_BarrelExit, sf::Vector2f( 1, 0 ) );
     else newbullet = new Bullet(m_BarrelExit, sf::Vector2f( -1, 0 ) );
 
+}
+
+void Player::jump()
+{
+    if(m_OnGround)
+    {
+        //m_Accel.y -= m_JumpForce;
+        m_Vel.y -= m_JumpForce;
+    }
 }
 
 void Player::update()
@@ -196,8 +209,12 @@ void Player::update()
         {
             // push out to just touch the surface
             // note : for some reason, the exact values were still detecting ocllision when pushing away
-            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top + 0.1;
+            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top + 0.2;
+            m_Position.y = startpos.y;
             m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+            m_Accel.y = 0;
+            m_Vel.y = 0;
+            m_OnGround = true;
         }
         else if(m_Vel.y < 0)
         {
@@ -205,13 +222,15 @@ void Player::update()
             m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
         }
     }
+    else m_OnGround = false;
 
 
 
     // debug info
     std::stringstream dbgss;
     dbgss << "pos:" << m_Position.x << "," << m_Position.y << ",\nvel:" << m_Vel.x << "," << m_Vel.y << "\n";
-    dbgss << "accel:" << m_Accel.x << "," << m_Accel.y << std::endl;
+    dbgss << "accel:" << m_Accel.x << "," << m_Accel.y << "\n";
+    dbgss << "onground:" << m_OnGround << std::endl;
     m_BlameCallback->dbg_txt->setString(dbgss.str());
 
     // update turret turning

@@ -34,9 +34,10 @@ private:
     float m_Gravity;
     float m_Friction;
     bool m_OnGround;
+    float m_JumpForce;
 
 public:
-    Player();
+    Player(sf::Vector2f tpos);
     ~Player();
 
     void update();
@@ -44,5 +45,6 @@ public:
 
     int m_Drive; // -1 = left, 0 = stopped, 1 = right
     void shoot();
+    void jump();
 };
 #endif // CLASS_PLAYER

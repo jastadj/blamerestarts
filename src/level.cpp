@@ -90,4 +90,8 @@ void Level::genLevel()
     setTile(5,2,1);
     setTile(5,1,1);
 
+    setTile(2,8, 1);
+    setTile(3,8, 1);
+    setTile(4,8, 1);
+
 }
