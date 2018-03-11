@@ -10,6 +10,7 @@
 #include "spritesheet.hpp"
 #include "particle.hpp"
 #include "player.hpp"
+#include "level.hpp"
 
 class Blame
 {
@@ -21,16 +22,20 @@ private:
     static Blame *m_Instance;
 
     bool init();
+    bool m_DebugMode;
 
     // assets
-    SpriteSheet *sstest;
+    SpriteSheet *m_TilesSS;
     ParticleManager *m_ParticleManager;
+    sf::Font m_Font;
 
 
     // game data
     Player *m_Player;
     time_t m_Seed;
     std::vector<GameOBJ*> m_GameObjects;
+    std::vector<Level*> m_Levels;
+    Level *m_CurrentLevel;
 
 
     // render window
@@ -43,6 +48,10 @@ private:
     // main loop
     void newGame();
     void mainLoop();
+
+    // draw
+    void drawLevel();
+    void drawRect(sf::FloatRect trect);
 
 public:
     // get singleton
@@ -59,7 +68,16 @@ public:
     time_t getSeed() { return m_Seed;}
     int32_t getDeltaTime() { return m_DeltaTime;}
 
+    // tile factory
+    Tile *createTile(int tilenum);
+
+    // all game objects must be registered and destroyed through these methods
     bool registerGameOBJ(GameOBJ *tobj);
     bool destroyGameOBJ(GameOBJ *tobj);
+
+    std::vector< sf::Vector2i > getMapCollision(GameOBJ *tobj);
+
+    // if in debug mode, draw this text to the screen
+    sf::Text *dbg_txt;
 };
 #endif // CLASS_BLAME

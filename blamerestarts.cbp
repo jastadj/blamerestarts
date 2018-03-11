@@ -44,12 +44,14 @@
 		<Unit filename="include/blame.hpp" />
 		<Unit filename="include/bullet.hpp" />
 		<Unit filename="include/gameobj.hpp" />
+		<Unit filename="include/level.hpp" />
 		<Unit filename="include/particle.hpp" />
 		<Unit filename="include/player.hpp" />
 		<Unit filename="include/spritesheet.hpp" />
 		<Unit filename="src/blame.cpp" />
 		<Unit filename="src/bullet.cpp" />
 		<Unit filename="src/gameobj.cpp" />
+		<Unit filename="src/level.cpp" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/particle.cpp" />
 		<Unit filename="src/player.cpp" />

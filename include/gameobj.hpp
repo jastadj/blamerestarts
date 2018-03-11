@@ -17,6 +17,7 @@ protected:
     // sprite
     std::vector<sf::Sprite*> m_Sprites;
     int m_SpriteState;
+    sf::Vector2f m_BoundingBoxOffset;
 
 public:
     GameOBJ();
@@ -26,6 +27,7 @@ public:
     sf::Vector2f m_Position;
     sf::Vector2f m_Vel;
     sf::Vector2f m_Accel;
+    sf::FloatRect m_BoundingBox;
 
     virtual void update()=0;
     virtual void draw(sf::RenderTarget *tscreen);

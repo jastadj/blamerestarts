@@ -11,10 +11,11 @@ private:
     static SpriteSheet *m_BulletSS;
 
     sf::Clock m_TimeAlive;
+    int m_MaxAge;
 
 
 public:
-    Bullet();
+    Bullet(sf::Vector2f tpos, sf::Vector2f tdir);
     ~Bullet();
 
     void update();

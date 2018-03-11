@@ -2,6 +2,8 @@
 #include "blame.hpp"
 #include "bullet.hpp"
 
+#include <sstream> // debug text
+
 SpriteSheet *Player::m_ChassisSS = new SpriteSheet(".\\data\\art\\chassis.png");
 SpriteSheet *Player::m_TurretSS = new SpriteSheet(".\\data\\art\\turret.png", 1, 3);
 SpriteSheet *Player::m_WheelSS = new SpriteSheet(".\\data\\art\\wheel.png");
@@ -44,10 +46,21 @@ Player::Player()
     m_TurretPosition = 1.f;
     m_TurretSpeed = 0.01f;
     m_Drive = 0; // -1 left, 1 right, 0 stopped
+    m_TerminalVel = sf::Vector2f(3, 3);
+    m_VelCutoff = sf::Vector2f(0.3, 0.3);
+    m_MaxAccel = sf::Vector2f(1.0, 1.0);
+    m_Friction = 0.05;
+    m_Gravity = 0.3;
 
     // randomize starting wheel rotation
     m_LeftWheelRot = rand()%360;
     m_RightWheelRot = rand()%360;
+
+    // init bounding box
+    m_BoundingBox.width = 44;
+    m_BoundingBox.height = 32;
+    m_BoundingBoxOffset = sf::Vector2f(-24, -18);
+
 
 }
 
@@ -61,32 +74,26 @@ void Player::shoot()
     // if turret is not in place, do not fire
     if(m_TurretPosition > 0.f && m_TurretPosition < 1.f) return;
 
-    Bullet *newbullet = new Bullet();
+    Bullet *newbullet;
 
-    if(m_TurretPosition == 1) newbullet->m_Vel = sf::Vector2f( newbullet->m_BulletSpeed, 0 );
-    else newbullet->m_Vel = sf::Vector2f(-newbullet->m_BulletSpeed, 0);
-    newbullet->m_Position = m_BarrelExit;
-
-    if(!m_BlameCallback->registerGameOBJ(newbullet))
-    {
-        std::cout << "Error in player shoot, unable to register bullet.\n";
-        delete newbullet;
-    }
+    if(m_TurretPosition == 1) newbullet = new Bullet(m_BarrelExit, sf::Vector2f( 1, 0 ) );
+    else newbullet = new Bullet(m_BarrelExit, sf::Vector2f( -1, 0 ) );
 
 }
 
 void Player::update()
 {
     int32_t dt = m_BlameCallback->getDeltaTime();
+    std::vector< sf::Vector2i > mapcol;
 
-    // driving?
+    // if driving, add acceleration
     if(m_Drive != 0)
     {
         m_LeftWheelRot += m_DriveSpeed * dt * m_Drive;
         m_RightWheelRot += m_DriveSpeed * dt * m_Drive;
 
-        // calc driving velocity
-        m_Vel = sf::Vector2f(0.66 * m_DriveSpeed * dt * m_Drive, 0);
+        // calc acceleration
+        m_Accel.x = 0.66 * m_DriveSpeed * dt * m_Drive;
 
         // if driving left
         if(m_Drive < 0)
@@ -95,10 +102,94 @@ void Player::update()
         }
         else if(m_SpriteState != FACING_RIGHT) m_SpriteState = TURNING_RIGHT;
     }
-    else m_Vel = sf::Vector2f(0,0);
+    else m_Accel.x = 0;
 
-    // update position
+    // add gravitational acceleration
+    m_Accel.y += m_Gravity;
+
+    // clip acceleration
+    if(m_Accel.x > m_MaxAccel.x) m_Accel.x = m_MaxAccel.x;
+    else if(m_Accel.x < -m_MaxAccel.x) m_Accel.x = -m_MaxAccel.x;
+
+    // update velocity from acceleration
+    m_Vel += m_Accel;
+
+    // if not applying drive, add deceleration / friction
+    if(m_Drive == 0)
+    {
+        // if moving
+        if(m_Vel.x != 0.f)
+        {
+            // decelerate velocity
+            m_Vel.x *= m_Friction * dt;
+
+            // if velocity is close enough to 0, kill it
+            if(m_Vel.x > 0.f)
+            {
+                if(m_Vel.x < m_VelCutoff.x) m_Vel.x = 0;
+            }
+            else if(m_Vel.x > -m_VelCutoff.x) m_Vel.x = 0;
+        }
+
+    }
+
+    // clip velocity at terminal vel
+    if(m_Vel.x > m_TerminalVel.x) m_Vel.x = m_TerminalVel.x;
+    else if(m_Vel.x < -m_TerminalVel.x) m_Vel.x = -m_TerminalVel.x;
+    if(m_Vel.y > m_TerminalVel.y) m_Vel.y = m_TerminalVel.y;
+    else if(m_Vel.y < -m_TerminalVel.y) m_Vel.y = -m_TerminalVel.y;
+
+    // update position from velocity
     m_Position += m_Vel;
+
+    // update bounding box position
+    m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+    m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+
+    // check map collision
+    mapcol = m_BlameCallback->getMapCollision(this);
+    if(!mapcol.empty())
+    {
+
+        // if collided while moving left
+        if(m_Vel.x < 0)
+        {
+            for(int i = 0; i < int(mapcol.size()); i++)
+            {
+                if( mapcol[i].x * TILE_SIZE + TILE_SIZE > m_BoundingBox.left)
+                {
+                    m_Position.x += (mapcol[i].x * TILE_SIZE + TILE_SIZE) - m_BoundingBox.left;
+                    m_Vel.x = 0;
+                    m_Accel.x = 0;
+                    break;
+                }
+            }
+        }
+        // if collided while moving right
+        else if(m_Vel.x > 0)
+        {
+            for(int i = 0; i < int(mapcol.size()); i++)
+            {
+                if( mapcol[i].x * TILE_SIZE < m_BoundingBox.left + m_BoundingBox.width)
+                {
+                    m_Position.x -= m_BoundingBox.left + m_BoundingBox.width - (mapcol[i].x * TILE_SIZE);
+                    m_Vel.x = 0;
+                    m_Accel.x = 0;
+                    break;
+                }
+            }
+        }
+
+        // re-update bounding box
+        m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
+        m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+    }
+
+    // debug info
+    std::stringstream dbgss;
+    dbgss << "pos:" << m_Position.x << "," << m_Position.y << ",\nvel:" << m_Vel.x << "," << m_Vel.y << "\n";
+    dbgss << "accel:" << m_Accel.x << "," << m_Accel.y << std::endl;
+    m_BlameCallback->dbg_txt->setString(dbgss.str());
 
     // update turret turning
     if(m_SpriteState == TURNING_RIGHT)
@@ -146,6 +237,7 @@ void Player::update()
 
     m_Sprites[WHEEL_LEFT]->setRotation(m_LeftWheelRot);
     m_Sprites[WHEEL_RIGHT]->setRotation(m_RightWheelRot);
+
 
 }
 
