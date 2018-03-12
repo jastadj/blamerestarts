@@ -1,0 +1,25 @@
+3/12
+levels
+- spikes
+- lava
+- more tiles
+- level exit/entrance
+- background
+
+3/13
+enemies
+- crawler
+- walker/jumper
+- flier
+player
+- health
+- repair
+powerups
+- health
+
+3/14
+- sound
+- music
+- polish
+- release
+
