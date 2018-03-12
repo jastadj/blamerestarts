@@ -42,15 +42,15 @@ Player::Player(sf::Vector2f tpos)
     m_SpriteState = FACING_RIGHT;
 
     // init properties
-    m_DriveSpeed = 0.3f;
+    m_DriveSpeed = 0.4f;
     m_TurretPosition = 1.f;
     m_TurretSpeed = 0.01f;
     m_Drive = 0; // -1 left, 1 right, 0 stopped
-    m_TerminalVel = sf::Vector2f(3, 3);
+    m_TerminalVel = sf::Vector2f(3, 5);
     m_VelCutoff = sf::Vector2f(0.3, 0.5);
     m_MaxAccel = sf::Vector2f(1.0, 1.0);
     m_Friction = 0.05;
-    m_Gravity = 0.002;
+    m_Gravity = 0.008;
     m_OnGround = false;
     m_JumpForce = 3.0f;
 
@@ -264,12 +264,22 @@ void Player::update()
         m_Sprites[TURRET_LEFT]->setPosition(m_Position - sf::Vector2f(34, 44) );
         m_BarrelExit = m_Position - sf::Vector2f(32,12);
     }
-    if(m_TurretPosition > 0 && m_TurretPosition < 1.f)
+    //if(m_TurretPosition > 0 && m_TurretPosition < 1.f)
         m_Sprites[TURRET_FORWARD]->setPosition( m_Position - sf::Vector2f(32, 44) );
 
     m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(10, 6) );
-    m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -5));
-    m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -5) );
+
+    // update wheel positions
+    if(m_Vel.y < 0)
+    {
+        m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -8));
+        m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -8) );
+    }
+    else
+    {
+        m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -5));
+        m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -5) );
+    }
 
     // set wheel rotation
     if(m_LeftWheelRot >=360.f) m_LeftWheelRot = m_LeftWheelRot - 360.f;
