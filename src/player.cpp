@@ -301,8 +301,8 @@ void Player::update()
         {
             // push out to just touch the surface
             // note : for some reason, the exact values were still detecting ocllision when pushing away
-            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top + 0.2;
-            m_Position.y = startpos.y;
+            m_Position.y -= (m_BoundingBox.top + m_BoundingBox.height) - coltile->boundingbox.top + 0.001;
+            //m_Position.y = startpos.y;
             m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
             m_Accel.y = 0;
             m_Vel.y = 0;
