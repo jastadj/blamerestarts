@@ -313,6 +313,8 @@ void Player::update()
         {
             m_Position.y += (coltile->boundingbox.top + coltile->boundingbox.height) - m_BoundingBox.top;
             m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+            m_Accel.y = 0;
+            m_Vel.y = 0;
         }
     }
     else m_OnGround = false;

@@ -168,11 +168,15 @@ void Blame::newGame()
     //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
 
     // start first level
+    m_CurrentLevel->startLevel();
     mainLoop();
 
     // next level
     while(1)
     {
+
+        std::cout << "Finding next level...\n";
+
         m_EndLevelTriggered = false;
         if(m_CurrentLevel == m_Levels.back()) return;
 
@@ -187,6 +191,10 @@ void Blame::newGame()
                 break;
             }
         }
+
+
+        // init level - init game objects
+        m_CurrentLevel->startLevel();
 
         // start game loop
         mainLoop();
@@ -206,7 +214,12 @@ void Blame::mainLoop()
     p1.m_custom_accel = sf::Vector2f(0, 0.05);
     */
 
+    // register player
+    registerGameOBJ(m_Player);
+
     sf::Clock frameclock;
+
+    std::cout << "Starting main loop.  " << m_GameObjects.size() << " game objects.\n";
 
     // main game loop
     while(!quit)
@@ -330,6 +343,9 @@ void Blame::mainLoop()
         if(m_EndLevelTriggered) quit = true;
 
     }
+
+    // cleanup level
+    m_CurrentLevel->endLevel();
 
 }
 

@@ -34,6 +34,7 @@ private:
     Blame *m_BlameCallback;
 
     std::vector< std::vector<Tile*> > m_Map;
+    std::vector<GameOBJ*> m_ObjectsToInit;
 
     unsigned int m_Width;
     unsigned int m_Height;
@@ -54,6 +55,8 @@ public:
     bool setTile(int x, int y, int tilenum);
 
     sf::Vector2f getStartingPosition();
+    void startLevel();
+    void endLevel();
 
 };
 #endif // CLASS_LEVEL

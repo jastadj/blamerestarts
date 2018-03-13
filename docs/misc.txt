@@ -3,10 +3,11 @@ levels
 + spikes
 + lava
 - more tiles
-- level exit/entrance
++ level exit/entrance
 - background
 
 3/13
+*** fix level loading transitions
 enemies
 - crawler
 - walker/jumper
@@ -15,7 +16,7 @@ player
 + health
 + repair
 powerups
-- health
++ health
 
 3/14
 - sound

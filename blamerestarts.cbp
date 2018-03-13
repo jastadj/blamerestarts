@@ -47,6 +47,7 @@
 		<Unit filename="include/level.hpp" />
 		<Unit filename="include/particle.hpp" />
 		<Unit filename="include/player.hpp" />
+		<Unit filename="include/repairitem.hpp" />
 		<Unit filename="include/spritesheet.hpp" />
 		<Unit filename="include/teleporter.hpp" />
 		<Unit filename="include/tools.hpp" />
@@ -57,6 +58,7 @@
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/particle.cpp" />
 		<Unit filename="src/player.cpp" />
+		<Unit filename="src/repairitem.cpp" />
 		<Unit filename="src/spritesheet.cpp" />
 		<Unit filename="src/teleporter.cpp" />
 		<Unit filename="src/tools.cpp" />

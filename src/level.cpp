@@ -7,6 +7,8 @@
 
 #include "tools.hpp"
 
+#include "repairitem.hpp"ddd
+
 Level::Level(unsigned int width, unsigned int height)
 {
     // get game callback
@@ -62,8 +64,8 @@ Level::Level(std::string levelfile)
     // create teleporters
     m_TeleporterStart = new Teleporter(TELEPOTER_START);
     m_TeleporterEnd = new Teleporter(TELEPORTER_END);
-    m_BlameCallback->registerGameOBJ(m_TeleporterStart);
-    m_BlameCallback->registerGameOBJ(m_TeleporterEnd);
+    m_ObjectsToInit.push_back(m_TeleporterStart);
+    m_ObjectsToInit.push_back(m_TeleporterEnd);
 
     // load map data from CSV
     while(!ifile.eof())
@@ -130,6 +132,13 @@ Level::Level(std::string levelfile)
                 std::vector<std::string> pos = csvParse(opbuf);
                 m_TeleporterEnd->m_Position = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
             }
+            else if(cmdbuf == "REPAIRITEM:")
+            {
+                std::vector<std::string> pos = csvParse(opbuf);
+                RepairItem *newrepairitem = new RepairItem();
+                newrepairitem->m_Position = sf::Vector2f( atof(pos[0].c_str())*TILE_SIZE, atof(pos[1].c_str())*TILE_SIZE);
+                m_ObjectsToInit.push_back(newrepairitem);
+            }
             else std::cout << "Unregognized map command!\n";
 
 
@@ -151,6 +160,23 @@ Level::~Level()
     // delete teleporters
     m_BlameCallback->destroyGameOBJ(m_TeleporterStart);
     m_BlameCallback->destroyGameOBJ(m_TeleporterEnd);
+}
+
+void Level::startLevel()
+{
+    // init objects in que to be registered
+
+    for(int i = 0; i < int(m_ObjectsToInit.size()); i++)
+    {
+        m_BlameCallback->registerGameOBJ(m_ObjectsToInit[i]);
+    }
+
+    m_ObjectsToInit.clear();
+}
+
+void Level::endLevel()
+{
+
 }
 
 sf::Vector2i Level::getDims()
