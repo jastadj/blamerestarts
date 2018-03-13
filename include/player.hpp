@@ -15,10 +15,10 @@ private:
     static SpriteSheet *m_WheelSS;
 
     enum PLAYERSPRITES{CHASSIS, TURRET_RIGHT, TURRET_FORWARD, TURRET_LEFT, WHEEL_LEFT, WHEEL_RIGHT, TURRET_UP_RIGHT,
-                        TURRET_UP_LEFT};
+                        TURRET_UP_LEFT, CHASSIS_UP_RIGHT, CHASSIS_UP_LEFT};
     enum PLAYERSTATES
     {
-        FACING_RIGHT, FACING_RIGHT_UP, TURNING_RIGHT, FACING_LEFT, FACING_LEFT_UP, TURNING_LEFT
+        FACING_RIGHT, TURNING_RIGHT, FACING_LEFT, TURNING_LEFT
     };
 
     // spawn position for bullets
@@ -37,13 +37,16 @@ private:
     float m_Friction;
     bool m_OnGround;
     float m_JumpForce;
+    int m_LookInYAxis; // -1 = down, 0 = normal, 1 = up
 
+    // damage and health
     int m_DamageInvincibleTime_ms;
     int m_DamageInvincibleBlink_ms;
     int32_t m_TimeDamageTaken;
     int m_CurrentHealth;
     int m_MaxHealth;
 
+    // repair
     int m_Repairs;
     int32_t m_RepairStartTime;
     int m_RepairMaxTime;
@@ -67,5 +70,6 @@ public:
     bool takeDamage(int dmg);
     int getRepairs() { return m_Repairs;}
     bool doRepair();
+    void lookInY(int ydir); // -1 down, 0 straight, 1 up
 };
 #endif // CLASS_PLAYER

@@ -13,7 +13,7 @@ enemies
 - flier
 player
 + health
-- repair
++ repair
 powerups
 - health
 

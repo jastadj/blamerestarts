@@ -197,14 +197,22 @@ void Blame::mainLoop()
         // event que
         sf::Event event;
 
+        // actively pressed
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) m_Player->m_Drive = 1;
         else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = -1;
         else m_Player->m_Drive = 0;
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) m_Player->lookInY(1);
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) m_Player->lookInY(-1);
+        else m_Player->lookInY(0);
 
 
         // handle all input events
         while(m_Screen->pollEvent(event))
         {
+            // if render window is not in focus, ignore inputs
+            if(!m_Screen->hasFocus()) break;
+
             // if window closed
             if(event.type == sf::Event::Closed) quit = true;
             // if a key was pressed

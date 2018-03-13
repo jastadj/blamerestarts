@@ -4,7 +4,7 @@
 
 #include <sstream> // debug text
 
-SpriteSheet *Player::m_ChassisSS = new SpriteSheet(".\\data\\art\\chassis.png");
+SpriteSheet *Player::m_ChassisSS = new SpriteSheet(".\\data\\art\\chassis.png", 3, 1);
 SpriteSheet *Player::m_TurretSS = new SpriteSheet(".\\data\\art\\turret.png", 1, 5);
 SpriteSheet *Player::m_WheelSS = new SpriteSheet(".\\data\\art\\wheel.png");
 
@@ -14,7 +14,7 @@ Player::Player(sf::Vector2f tpos)
     if(m_ChassisSS->initialized())
     {
         // sprite 0
-        m_Sprites.push_back(m_ChassisSS->createSprite());
+        m_Sprites.push_back(m_ChassisSS->createSprite(0));
     }
 
     if(m_TurretSS->initialized())
@@ -47,6 +47,16 @@ Player::Player(sf::Vector2f tpos)
         m_Sprites.push_back(m_TurretSS->createSprite(4));
     }
 
+    // create sprites
+    if(m_ChassisSS->initialized())
+    {
+        // sprite 8 - looking up right
+        m_Sprites.push_back(m_ChassisSS->createSprite(1));
+
+        // sprite 9 - looking up left
+        m_Sprites.push_back(m_ChassisSS->createSprite(2));
+    }
+
     m_SpriteState = FACING_RIGHT;
 
     // physics
@@ -61,6 +71,7 @@ Player::Player(sf::Vector2f tpos)
     m_Gravity = 0.008;
     m_OnGround = false;
     m_JumpForce = 4.0f;
+    m_LookInYAxis = 0;
 
     // health
     m_MaxHealth = 5;
@@ -117,7 +128,11 @@ void Player::shoot()
 
     Bullet *newbullet;
 
-    if(m_TurretPosition == 1) newbullet = new Bullet(m_BarrelExit, sf::Vector2f( 1, 0 ) );
+    // if turret is looking upwards
+    if(m_LookInYAxis == 1) newbullet = new Bullet(m_BarrelExit, sf::Vector2f(0, -1));
+    // if turret is facing to the right
+    else if(m_TurretPosition == 1) newbullet = new Bullet(m_BarrelExit, sf::Vector2f( 1, 0 ) );
+    // else if turret is facing to the left
     else newbullet = new Bullet(m_BarrelExit, sf::Vector2f( -1, 0 ) );
 
 }
@@ -129,6 +144,17 @@ void Player::jump()
         //m_Accel.y -= m_JumpForce;
         m_Vel.y -= m_JumpForce;
     }
+}
+
+void Player::lookInY(int ydir)
+{
+    int oldlook = m_LookInYAxis;
+
+    m_LookInYAxis = ydir;
+
+    if(m_LookInYAxis < -1) m_LookInYAxis = -1;
+    else if(m_LookInYAxis > 1) m_LookInYAxis = 1;
+
 }
 
 bool Player::takeDamage(int dmg)
@@ -171,9 +197,24 @@ void Player::update()
         // if driving left
         if(m_Drive < 0)
         {
-            if(m_SpriteState != FACING_LEFT) m_SpriteState = TURNING_LEFT;
+            // if looking up, just look left, no transition
+            if(m_LookInYAxis == 1)
+            {
+                m_SpriteState = FACING_LEFT;
+                m_TurretPosition = 0.f;
+            }
+            else if(m_SpriteState != FACING_LEFT) m_SpriteState = TURNING_LEFT;
         }
-        else if(m_SpriteState != FACING_RIGHT) m_SpriteState = TURNING_RIGHT;
+        else
+        {
+            // if looking up, just look right, no transition
+            if(m_LookInYAxis == 1)
+            {
+                m_SpriteState = FACING_RIGHT;
+                m_TurretPosition = 1.f;
+            }
+            else if(m_SpriteState != FACING_RIGHT) m_SpriteState = TURNING_RIGHT;
+        }
     }
     else m_Accel.x = 0;
 
@@ -307,29 +348,74 @@ void Player::update()
     // update sprite offsets relative to player position and barrel exit points
     if(m_SpriteState == FACING_RIGHT)
     {
-        m_Sprites[TURRET_RIGHT]->setPosition( m_Position - sf::Vector2f(32, 44) );
-        m_BarrelExit = m_Position - sf::Vector2f(-32,12);
+        // if looking up
+        if(m_LookInYAxis == 1)
+        {
+            m_Sprites[TURRET_UP_RIGHT]->setPosition( m_Position - sf::Vector2f(34, 43) );
+            m_BarrelExit = m_Position - sf::Vector2f(7,41);
+        }
+        else
+        {
+            m_Sprites[TURRET_RIGHT]->setPosition( m_Position - sf::Vector2f(32, 44) );
+            m_BarrelExit = m_Position - sf::Vector2f(-32,12);
+        }
+
     }
     else if(m_SpriteState == FACING_LEFT)
     {
-        m_Sprites[TURRET_LEFT]->setPosition(m_Position - sf::Vector2f(34, 44) );
-        m_BarrelExit = m_Position - sf::Vector2f(32,12);
+        // if looking up
+        if(m_LookInYAxis == 1)
+        {
+            m_Sprites[TURRET_UP_LEFT]->setPosition(m_Position - sf::Vector2f(34, 43) );
+            m_BarrelExit = m_Position - sf::Vector2f(-4,41);
+        }
+        else
+        {
+            m_Sprites[TURRET_LEFT]->setPosition(m_Position - sf::Vector2f(34, 44) );
+            m_BarrelExit = m_Position - sf::Vector2f(32,12);
+        }
+
     }
+
     //if(m_TurretPosition > 0 && m_TurretPosition < 1.f)
         m_Sprites[TURRET_FORWARD]->setPosition( m_Position - sf::Vector2f(32, 44) );
 
-    m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(10, 6) );
+    m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(34, 43) );
+    m_Sprites[CHASSIS_UP_LEFT]->setPosition( m_Position - sf::Vector2f(34, 43) );
+    m_Sprites[CHASSIS_UP_RIGHT]->setPosition( m_Position - sf::Vector2f(34, 43) );
 
     // update wheel positions
+    // if moving upwards, push wheels down
     if(m_Vel.y < 0)
     {
-        m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -8));
-        m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -8) );
+        // if looking upwards, bring wheels together
+        if(m_LookInYAxis == 1)
+        {
+            m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(12, -8));
+            m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-9, -8) );
+        }
+        else
+        {
+            m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -8));
+            m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -8) );
+        }
+
     }
+    // else not moving up
     else
     {
-        m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -5));
-        m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -5) );
+        // if looking up, bring wheels in
+        if(m_LookInYAxis == 1)
+        {
+            m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(12, -5));
+            m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-9, -5) );
+        }
+        else
+        {
+            m_Sprites[WHEEL_LEFT]->setPosition(m_Position - sf::Vector2f(18, -5));
+            m_Sprites[WHEEL_RIGHT]->setPosition(m_Position - sf::Vector2f(-15, -5) );
+        }
+
     }
 
     // set wheel rotation
@@ -371,9 +457,33 @@ void Player::draw(sf::RenderTarget *tscreen)
 
     if(dodraw)
     {
-        tscreen->draw(*m_Sprites[CHASSIS]);
-        if(m_SpriteState == FACING_RIGHT) tscreen->draw(*m_Sprites[TURRET_RIGHT]);
-        else if(m_SpriteState == FACING_LEFT) tscreen->draw(*m_Sprites[TURRET_LEFT]);
+        // if looking straight, draw normal chassis
+        if(m_LookInYAxis <= 0) tscreen->draw(*m_Sprites[CHASSIS]);
+
+        // if facing right
+        if(m_SpriteState == FACING_RIGHT)
+        {
+            // if facing right and looking up
+            if(m_LookInYAxis == 1)
+            {
+                // draw chassis and turret
+                tscreen->draw(*m_Sprites[CHASSIS_UP_RIGHT]);
+                tscreen->draw(*m_Sprites[TURRET_UP_RIGHT]);
+            }
+            else tscreen->draw(*m_Sprites[TURRET_RIGHT]);
+        }
+        // if facing left
+        else if(m_SpriteState == FACING_LEFT)
+        {
+            // if facing left and looking up
+            if(m_LookInYAxis == 1)
+            {
+                // draw chassis and turret
+                tscreen->draw(*m_Sprites[CHASSIS_UP_LEFT]);
+                tscreen->draw(*m_Sprites[TURRET_UP_LEFT]);
+            }
+            else tscreen->draw(*m_Sprites[TURRET_LEFT]);
+        }
         else if(m_SpriteState == TURNING_LEFT || m_SpriteState == TURNING_RIGHT) tscreen->draw(*m_Sprites[TURRET_FORWARD]);
         tscreen->draw(*m_Sprites[WHEEL_LEFT]);
         tscreen->draw(*m_Sprites[WHEEL_RIGHT]);
