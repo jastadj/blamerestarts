@@ -385,7 +385,7 @@ bool Player::doRepair()
 {
     if(m_Repairs <= 0 || m_IsRepairing ) return false;
 
-    //m_Repairs--;
+    m_Repairs--;
 
     m_IsRepairing = true;
     m_RepairStartTime = m_TimeAlive.getElapsedTime().asMilliseconds();
