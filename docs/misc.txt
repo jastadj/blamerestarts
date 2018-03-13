@@ -1,7 +1,7 @@
 3/12
 levels
-- spikes
-- lava
++ spikes
++ lava
 - more tiles
 - level exit/entrance
 - background
@@ -12,7 +12,7 @@ enemies
 - walker/jumper
 - flier
 player
-- health
++ health
 - repair
 powerups
 - health

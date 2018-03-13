@@ -3,6 +3,7 @@
 
 #include "gameobj.hpp"
 #include "spritesheet.hpp"
+#include "particle.hpp"
 
 class Player: public GameOBJ
 {
@@ -13,10 +14,11 @@ private:
     static SpriteSheet *m_TurretSS;
     static SpriteSheet *m_WheelSS;
 
-    enum PLAYERSPRITES{CHASSIS, TURRET_RIGHT, TURRET_FORWARD, TURRET_LEFT, WHEEL_LEFT, WHEEL_RIGHT};
+    enum PLAYERSPRITES{CHASSIS, TURRET_RIGHT, TURRET_FORWARD, TURRET_LEFT, WHEEL_LEFT, WHEEL_RIGHT, TURRET_UP_RIGHT,
+                        TURRET_UP_LEFT};
     enum PLAYERSTATES
     {
-        FACING_RIGHT, TURNING_RIGHT, FACING_LEFT, TURNING_LEFT
+        FACING_RIGHT, FACING_RIGHT_UP, TURNING_RIGHT, FACING_LEFT, FACING_LEFT_UP, TURNING_LEFT
     };
 
     // spawn position for bullets
@@ -42,6 +44,13 @@ private:
     int m_CurrentHealth;
     int m_MaxHealth;
 
+    int m_Repairs;
+    int32_t m_RepairStartTime;
+    int m_RepairMaxTime;
+    bool m_IsRepairing;
+    ParticleEmitter *m_Emitter_Repair;
+    ParticleEmitter *m_Emitter_Repair2;
+
 public:
     Player(sf::Vector2f tpos);
     ~Player();
@@ -56,5 +65,7 @@ public:
     int getHealth() { return m_CurrentHealth;}
     int getMaxHealth() { return m_MaxHealth;}
     bool takeDamage(int dmg);
+    int getRepairs() { return m_Repairs;}
+    bool doRepair();
 };
 #endif // CLASS_PLAYER

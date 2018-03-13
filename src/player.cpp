@@ -5,7 +5,7 @@
 #include <sstream> // debug text
 
 SpriteSheet *Player::m_ChassisSS = new SpriteSheet(".\\data\\art\\chassis.png");
-SpriteSheet *Player::m_TurretSS = new SpriteSheet(".\\data\\art\\turret.png", 1, 3);
+SpriteSheet *Player::m_TurretSS = new SpriteSheet(".\\data\\art\\turret.png", 1, 5);
 SpriteSheet *Player::m_WheelSS = new SpriteSheet(".\\data\\art\\wheel.png");
 
 Player::Player(sf::Vector2f tpos)
@@ -39,9 +39,17 @@ Player::Player(sf::Vector2f tpos)
         m_Sprites.back()->setOrigin(sf::Vector2f(7.5,7.5));
     }
 
+    if(m_TurretSS->initialized())
+    {
+        // turret right - sprite 6
+        m_Sprites.push_back(m_TurretSS->createSprite(3));
+        // turret forward - sprite 7
+        m_Sprites.push_back(m_TurretSS->createSprite(4));
+    }
+
     m_SpriteState = FACING_RIGHT;
 
-    // init properties
+    // physics
     m_DriveSpeed = 0.4f;
     m_TurretPosition = 1.f;
     m_TurretSpeed = 0.01f;
@@ -54,11 +62,33 @@ Player::Player(sf::Vector2f tpos)
     m_OnGround = false;
     m_JumpForce = 4.0f;
 
+    // health
     m_MaxHealth = 5;
     m_CurrentHealth = m_MaxHealth;
     m_DamageInvincibleTime_ms = 2000;
     m_DamageInvincibleBlink_ms = 200;
     m_TimeDamageTaken = -m_DamageInvincibleTime_ms - 1;
+
+    // repair
+    m_Repairs = 1;
+    m_IsRepairing = false;
+    m_RepairMaxTime = 1000;
+    m_RepairStartTime = 0;
+
+    // configure repair emitter
+    m_Emitter_Repair = new ParticleEmitter(m_BlameCallback->getParticleManager(), PEMIT_CUSTOM);
+    m_Emitter_Repair->m_custom_accel = sf::Vector2f(0,0);
+    m_Emitter_Repair->m_custom_color = sf::Color(0,128,0,128);
+    m_Emitter_Repair->m_custom_min_life = 500;
+    m_Emitter_Repair->m_custom_max_life = 1500;
+
+    // configure other repair emitter
+    m_Emitter_Repair2 = new ParticleEmitter(m_BlameCallback->getParticleManager(), PEMIT_CUSTOM);
+    m_Emitter_Repair2->m_custom_accel = m_Emitter_Repair->m_custom_accel;
+    m_Emitter_Repair2->m_custom_color = sf::Color(0,200,0,128);
+    m_Emitter_Repair2->m_custom_min_life = 500;
+    m_Emitter_Repair2->m_custom_max_life = 1500;
+    m_Emitter_Repair2->m_custom_texture_index = 1;
 
     // randomize starting wheel rotation
     m_LeftWheelRot = rand()%360;
@@ -311,7 +341,19 @@ void Player::update()
     m_Sprites[WHEEL_LEFT]->setRotation(m_LeftWheelRot);
     m_Sprites[WHEEL_RIGHT]->setRotation(m_RightWheelRot);
 
+    // set repair emitter to player position
+    m_Emitter_Repair->setPosition(m_Position);
+    m_Emitter_Repair2->setPosition(m_Position);
 
+    // if currently repairing, add repair particles
+    if(m_IsRepairing)
+    {
+        if(rand()%2)
+            m_Emitter_Repair->createParticle( sf::Vector2f(rand()%64-32, 0), sf::Vector2f(0, -0.02 * dt) );
+        else m_Emitter_Repair2->createParticle( sf::Vector2f(rand()%64-32, 0), sf::Vector2f(0, -0.02 * dt) );
+
+        if(m_TimeAlive.getElapsedTime().asMilliseconds() - m_RepairStartTime > m_RepairMaxTime) m_IsRepairing = false;
+    }
 }
 
 void Player::draw(sf::RenderTarget *tscreen)
@@ -337,4 +379,16 @@ void Player::draw(sf::RenderTarget *tscreen)
         tscreen->draw(*m_Sprites[WHEEL_RIGHT]);
     }
 
+}
+
+bool Player::doRepair()
+{
+    if(m_Repairs <= 0 || m_IsRepairing ) return false;
+
+    //m_Repairs--;
+
+    m_IsRepairing = true;
+    m_RepairStartTime = m_TimeAlive.getElapsedTime().asMilliseconds();
+
+    m_CurrentHealth = m_MaxHealth;
 }

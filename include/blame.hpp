@@ -30,6 +30,7 @@ private:
     sf::Font m_Font;
     SpriteSheet *m_UISS;
     std::vector< sf::Sprite* > m_UI_Health_Sprites;
+    sf::Sprite *m_UI_Repair_Sprite;
 
 
     // game data
@@ -80,6 +81,7 @@ public:
 
     Tile *getMapCollision(GameOBJ *tobj);
 
+    ParticleManager *getParticleManager() { return m_ParticleManager;}
     // if in debug mode, draw this text to the screen
     sf::Text *dbg_txt;
 };

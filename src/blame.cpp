@@ -50,9 +50,10 @@ bool Blame::init()
     m_TilesSS = new SpriteSheet(".\\data\\art\\tiles.png", tilesw, tilesh);
 
     // init ui sprite sheet
-    m_UISS = new SpriteSheet(".\\data\\art\\uigfx.png", 2, 1);
+    m_UISS = new SpriteSheet(".\\data\\art\\uigfx.png", 3, 1);
     m_UI_Health_Sprites.push_back( m_UISS->createSprite(0));
     m_UI_Health_Sprites.push_back( m_UISS->createSprite(1));
+    m_UI_Repair_Sprite = m_UISS->createSprite(2);
 
 
     // create fonts and debug text
@@ -152,7 +153,7 @@ void Blame::newGame()
     m_Levels.clear();
 
     // init player
-    m_Player = new Player( sf::Vector2f(100,100) );
+    m_Player = new Player( sf::Vector2f(100,32 * 29) );
     //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
 
     // clear any existing particles
@@ -212,6 +213,7 @@ void Blame::mainLoop()
                 if(event.key.code == sf::Keyboard::Escape) quit = true;
                 else if(event.key.code == sf::Keyboard::F1) m_DebugMode = !m_DebugMode;
                 else if(event.key.code == sf::Keyboard::Space) m_Player->jump();
+                else if(event.key.code == sf::Keyboard::R) m_Player->doRepair();
             }
             // if mouse button pressed
             else if(event.type == sf::Event::MouseButtonPressed)
@@ -222,7 +224,6 @@ void Blame::mainLoop()
                     // particle test
                     //p1.createParticle(sf::Vector2f(0,0), sf::Vector2f(1,-0.7));
                     m_Player->shoot();
-                    std::cout << "test\n";
                 }
             }
         }
@@ -317,9 +318,12 @@ void Blame::drawRect(sf::FloatRect trect)
 void Blame::drawHUD()
 {
     sf::Vector2f healthoffset;
+    sf::Vector2f repairoffset;
 
     int pmaxh = m_Player->getMaxHealth();
     int pcurh = m_Player->getHealth();
+
+    int pcurr = m_Player->getRepairs();
 
     for(int i = 0; i < pmaxh; i++)
     {
@@ -334,6 +338,22 @@ void Blame::drawHUD()
             m_Screen->draw( *m_UI_Health_Sprites[0]);
         }
     }
+
+    repairoffset = healthoffset + sf::Vector2f(pmaxh*32, 0) + sf::Vector2f(32,0);
+
+    for(int i = 0; i < pcurr; i++)
+    {
+        if(i < pcurr)
+        {
+            m_UI_Repair_Sprite->setPosition( sf::Vector2f(i*32,0) + repairoffset);
+            m_Screen->draw( *m_UI_Repair_Sprite);
+        }
+    }
+
+
+
+
+
 }
 
 Tile *Blame::getMapCollision(GameOBJ *tobj)
