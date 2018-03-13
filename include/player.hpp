@@ -72,5 +72,6 @@ public:
     int getRepairs() { return m_Repairs;}
     bool doRepair();
     void lookInY(int ydir); // -1 down, 0 straight, 1 up
+    void reset();
 };
 #endif // CLASS_PLAYER

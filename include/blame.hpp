@@ -39,6 +39,7 @@ private:
     std::vector<GameOBJ*> m_GameObjects;
     std::vector<Level*> m_Levels;
     Level *m_CurrentLevel;
+    bool m_EndLevelTriggered;
 
 
     // render window
@@ -83,6 +84,9 @@ public:
     std::vector<GameOBJ*> getObjectCollisions(GameOBJ *tobj);
 
     ParticleManager *getParticleManager() { return m_ParticleManager;}
+
+    void triggerEndLevel();
+
     // if in debug mode, draw this text to the screen
     sf::Text *dbg_txt;
 };

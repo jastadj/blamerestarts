@@ -330,7 +330,7 @@ void Player::update()
             // if hitting the end teleporter
             if(go_teleporter)
             {
-
+                if(go_teleporter->isTeleporterEnd()) m_BlameCallback->triggerEndLevel();
             }
         }
 
@@ -533,4 +533,12 @@ bool Player::doRepair()
     m_CurrentHealth = m_MaxHealth;
 
     std::cout << "Repaired.\n";
+}
+
+void Player::reset()
+{
+    m_Vel = sf::Vector2f(0,0);
+    m_Accel = sf::Vector2f(0,0);
+    m_IsRepairing = false;
+    m_TimeDamageTaken = -m_DamageInvincibleTime_ms - 1;
 }

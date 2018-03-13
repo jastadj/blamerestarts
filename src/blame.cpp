@@ -22,6 +22,7 @@ Blame::Blame()
     m_DeltaTime = 0;
     m_Instance = this;
     m_DebugMode = false;
+    m_EndLevelTriggered = false;
 
     init();
 
@@ -43,6 +44,8 @@ bool Blame::init()
     // render settings
     m_Screen->setFramerateLimit(60); // 60fps limit
     m_Screen->setVerticalSyncEnabled(true);
+    // zoom in view
+    m_View.zoom(0.5);
 
     // init tile sprite sheet
     const int tilesw = 4;
@@ -155,16 +158,40 @@ void Blame::newGame()
     // clear any existing particles
     m_ParticleManager->clear();
 
-    // create levels
+    // create levels and set current level to first level
     m_Levels.push_back(new Level(".\\data\\levels\\level_01.txt"));
-    m_CurrentLevel = m_Levels.back();
+    m_Levels.push_back(new Level(".\\data\\levels\\level_02.txt"));
+    m_CurrentLevel = m_Levels[0];
 
     // init player
     m_Player = new Player( m_CurrentLevel->getStartingPosition() );
     //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
 
-    // start main loop
+    // start first level
     mainLoop();
+
+    // next level
+    while(1)
+    {
+        m_EndLevelTriggered = false;
+        if(m_CurrentLevel == m_Levels.back()) return;
+
+        // find next level
+        for(int i = 0; i < int(m_Levels.size()); i++)
+        {
+            if(m_CurrentLevel == m_Levels[i])
+            {
+                m_CurrentLevel = m_Levels[i+1];
+                m_Player->m_Position = m_CurrentLevel->getStartingPosition();
+                m_Player->reset();
+                break;
+            }
+        }
+
+        // start game loop
+        mainLoop();
+    }
+
 }
 
 void Blame::mainLoop()
@@ -178,9 +205,6 @@ void Blame::mainLoop()
     //p1.m_custom_color = sf::Color(236,191,44,255);
     p1.m_custom_accel = sf::Vector2f(0, 0.05);
     */
-
-    // zoom in view
-    m_View.zoom(0.5);
 
     sf::Clock frameclock;
 
@@ -214,6 +238,7 @@ void Blame::mainLoop()
             else if(event.type == sf::Event::KeyPressed)
             {
                 if(event.key.code == sf::Keyboard::Escape) quit = true;
+                else if(m_EndLevelTriggered) break;
                 else if(event.key.code == sf::Keyboard::F1) m_DebugMode = !m_DebugMode;
                 else if(event.key.code == sf::Keyboard::Space) m_Player->jump();
                 else if(event.key.code == sf::Keyboard::R) m_Player->doRepair();
@@ -222,6 +247,7 @@ void Blame::mainLoop()
                 else if(event.key.code == sf::Keyboard::W) m_Player->lookInY(1);
                 else if(event.key.code == sf::Keyboard::S) m_Player->lookInY(-1);
             }
+            else if(m_EndLevelTriggered) break;
             else if(event.type == sf::Event::KeyReleased)
             {
                 if(event.key.code == sf::Keyboard::D)
@@ -263,7 +289,7 @@ void Blame::mainLoop()
         m_ParticleManager->update();
         for(int i = int(m_GameObjects.size()-1); i >= 0; i--)
         {
-            m_GameObjects[i]->update();
+            if(!m_EndLevelTriggered) m_GameObjects[i]->update();
         }
 
         // update view
@@ -300,6 +326,8 @@ void Blame::mainLoop()
 
         m_DeltaTime = frameclock.getElapsedTime().asMilliseconds();
         frameclock.restart();
+
+        if(m_EndLevelTriggered) quit = true;
 
     }
 
@@ -444,4 +472,9 @@ std::vector<GameOBJ*> Blame::getObjectCollisions(GameOBJ *tobj)
     }
 
     return ocol;
+}
+
+void Blame::triggerEndLevel()
+{
+    m_EndLevelTriggered = true;
 }
