@@ -28,6 +28,8 @@ private:
     SpriteSheet *m_TilesSS;
     ParticleManager *m_ParticleManager;
     sf::Font m_Font;
+    SpriteSheet *m_UISS;
+    std::vector< sf::Sprite* > m_UI_Health_Sprites;
 
 
     // game data
@@ -52,6 +54,7 @@ private:
     // draw
     void drawLevel();
     void drawRect(sf::FloatRect trect);
+    void drawHUD();
 
 public:
     // get singleton

@@ -1,6 +1,12 @@
 #include "level.hpp"
 #include "blame.hpp"
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
+#include "tools.hpp"
+
 Level::Level(unsigned int width, unsigned int height)
 {
     // get game callback
@@ -24,6 +30,59 @@ Level::Level(unsigned int width, unsigned int height)
 
     // generate level
     genLevel();
+}
+
+Level::Level(std::string levelfile)
+{
+    std::ifstream ifile;
+    std::string buf;
+
+    std::vector<std::string> dimcsv;
+
+    // get game callback
+    m_BlameCallback = Blame::getInstance();
+
+    ifile.open(levelfile.c_str());
+
+    if(!ifile.is_open())
+    {
+        std::cout << "ERROR LOADING LEVEL FROM FILE : " << levelfile << std::endl;
+        exit(4);
+    }
+
+    std::cout << "Loading level from file : " << levelfile << " , w:";
+
+    std::getline(ifile, buf);
+
+    // get dimensions
+    dimcsv = csvParse(buf);
+    m_Width = atoi(dimcsv[0].c_str());
+    m_Height = atoi(dimcsv[1].c_str());
+    std::cout << m_Width << ",h:" << m_Height << std::endl;
+
+    // create 2d array vector
+    m_Map.resize(m_Height);
+    for(int i = 0; i < int(m_Height); i++) m_Map[i].resize(m_Width);
+
+    // zeroize map data
+    for(int i = 0; i < int(m_Height); i++)
+        for(int n = 0; n < int(m_Width); n++) m_Map[i][n] = m_BlameCallback->createTile(0);
+
+    // load map data from CSV
+
+    for(int i = 0; i < m_Height; i++)
+    {
+        std::string lbuf;
+
+        std::getline(ifile, lbuf);
+
+        std::vector<std::string> mapline = csvParse(lbuf);
+
+        for(int n = 0; n < m_Width; n++) setTile(n, i, atoi( mapline[n].c_str()) );
+    }
+
+    ifile.close();
+
 }
 
 Level::~Level()
@@ -65,8 +124,31 @@ bool Level::setTile(int x, int y, int tilenum)
     // set new tile bounding box
     bb.left = x * TILE_SIZE;
     bb.width = TILE_SIZE;
-    bb.top = y * TILE_SIZE;
-    bb.height = TILE_SIZE;
+    // ceiling spikes
+    if(tilenum == 2)
+    {
+        bb.top = y * TILE_SIZE;
+        bb.height = 24;
+    }
+    // floor spikes
+    else if(tilenum == 3)
+    {
+        bb.top = y * TILE_SIZE + 10;
+        bb.height = 22;
+        bb.left = x * TILE_SIZE + 2;
+        bb.width = TILE_SIZE-4;
+    }
+    // lava
+    else if(tilenum == 4)
+    {
+        bb.top = y * TILE_SIZE + 16;
+        bb.height = 16;
+    }
+    else
+    {
+        bb.top = y * TILE_SIZE;
+        bb.height = TILE_SIZE;
+    }
     m_Map[y][x]->boundingbox = bb;
 
     return true;
@@ -78,7 +160,17 @@ void Level::genLevel()
 
     for(int i = 0; i < int(m_Width); i++) setTile(i, 0, 1);
 
+    // bottom 2 rows solid
     for(int i = 0; i < int(m_Width); i++) setTile(i, m_Height-1, 1);
+    for(int i = 0; i < int(m_Width); i++) setTile(i, m_Height-2, 1);
+
+    // add some lava
+    setTile(8, m_Height-2, 4);
+    setTile(7, m_Height-2, 4);
+
+    // ceiling spikes
+    setTile(1,1, 2);
+    setTile(16, m_Height-3, 3);
 
     for(int i = 0; i < int(m_Height); i++) setTile(0, i, 1);
 

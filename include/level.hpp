@@ -2,6 +2,7 @@
 #define CLASS_LEVEL
 
 #include <vector>
+#include <string>
 #include <SFML\Graphics.hpp>
 
 #define TILE_SIZE 32
@@ -17,7 +18,9 @@ struct Tile
     int id;
     sf::FloatRect boundingbox;
 
-    Tile(): blocked(true)
+    int tiledamage;
+
+    Tile(): blocked(true), tiledamage(0)
         {
         }
 };
@@ -37,6 +40,7 @@ private:
 
 public:
     Level(unsigned int width, unsigned int height);
+    Level(std::string levelfile);
     ~Level();
 
     sf::Vector2i getDims();

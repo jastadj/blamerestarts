@@ -52,7 +52,13 @@ Player::Player(sf::Vector2f tpos)
     m_Friction = 0.05;
     m_Gravity = 0.008;
     m_OnGround = false;
-    m_JumpForce = 3.0f;
+    m_JumpForce = 4.0f;
+
+    m_MaxHealth = 5;
+    m_CurrentHealth = m_MaxHealth;
+    m_DamageInvincibleTime_ms = 2000;
+    m_DamageInvincibleBlink_ms = 200;
+    m_TimeDamageTaken = -m_DamageInvincibleTime_ms - 1;
 
     // randomize starting wheel rotation
     m_LeftWheelRot = rand()%360;
@@ -95,6 +101,21 @@ void Player::jump()
     }
 }
 
+bool Player::takeDamage(int dmg)
+{
+    // if taking damage during "invincible" time, ignore
+    if( (m_TimeAlive.getElapsedTime().asMilliseconds() - m_TimeDamageTaken) < m_DamageInvincibleTime_ms) return false;
+
+    // capture time of damage taken
+    m_TimeDamageTaken = m_TimeAlive.getElapsedTime().asMilliseconds();
+
+    // take damage
+    m_CurrentHealth -= dmg;
+
+    return true;
+
+}
+
 void Player::update()
 {
     int32_t dt = m_BlameCallback->getDeltaTime();
@@ -105,7 +126,7 @@ void Player::update()
     //m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
 
     sf::Vector2f startpos = m_Position;
-    sf::Vector2f startvel = m_Vel;
+    //sf::Vector2f startvel = m_Vel;
 
     // UPDATE X AXIS POS/VEL/ACCEL
     // if driving, add acceleration
@@ -297,10 +318,23 @@ void Player::draw(sf::RenderTarget *tscreen)
 {
     if(!tscreen) return;
 
-    tscreen->draw(*m_Sprites[CHASSIS]);
-    if(m_SpriteState == FACING_RIGHT) tscreen->draw(*m_Sprites[TURRET_RIGHT]);
-    else if(m_SpriteState == FACING_LEFT) tscreen->draw(*m_Sprites[TURRET_LEFT]);
-    else if(m_SpriteState == TURNING_LEFT || m_SpriteState == TURNING_RIGHT) tscreen->draw(*m_Sprites[TURRET_FORWARD]);
-    tscreen->draw(*m_Sprites[WHEEL_LEFT]);
-    tscreen->draw(*m_Sprites[WHEEL_RIGHT]);
+    bool dodraw = true;
+
+    // if blinking from damage taken
+    if(m_TimeAlive.getElapsedTime().asMilliseconds() - m_TimeDamageTaken < m_DamageInvincibleTime_ms)
+    {
+        if( sin( (3.14159 / m_DamageInvincibleBlink_ms) * (m_TimeAlive.getElapsedTime().asMilliseconds() - m_TimeDamageTaken) ) >= 0)
+            dodraw = false;
+    }
+
+    if(dodraw)
+    {
+        tscreen->draw(*m_Sprites[CHASSIS]);
+        if(m_SpriteState == FACING_RIGHT) tscreen->draw(*m_Sprites[TURRET_RIGHT]);
+        else if(m_SpriteState == FACING_LEFT) tscreen->draw(*m_Sprites[TURRET_LEFT]);
+        else if(m_SpriteState == TURNING_LEFT || m_SpriteState == TURNING_RIGHT) tscreen->draw(*m_Sprites[TURRET_FORWARD]);
+        tscreen->draw(*m_Sprites[WHEEL_LEFT]);
+        tscreen->draw(*m_Sprites[WHEEL_RIGHT]);
+    }
+
 }

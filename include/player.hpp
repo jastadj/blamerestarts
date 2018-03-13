@@ -36,6 +36,12 @@ private:
     bool m_OnGround;
     float m_JumpForce;
 
+    int m_DamageInvincibleTime_ms;
+    int m_DamageInvincibleBlink_ms;
+    int32_t m_TimeDamageTaken;
+    int m_CurrentHealth;
+    int m_MaxHealth;
+
 public:
     Player(sf::Vector2f tpos);
     ~Player();
@@ -46,5 +52,9 @@ public:
     int m_Drive; // -1 = left, 0 = stopped, 1 = right
     void shoot();
     void jump();
+
+    int getHealth() { return m_CurrentHealth;}
+    int getMaxHealth() { return m_MaxHealth;}
+    bool takeDamage(int dmg);
 };
 #endif // CLASS_PLAYER

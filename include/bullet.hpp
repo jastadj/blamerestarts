@@ -10,7 +10,6 @@ private:
 
     static SpriteSheet *m_BulletSS;
 
-    sf::Clock m_TimeAlive;
     int m_MaxAge;
 
 

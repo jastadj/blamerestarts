@@ -48,6 +48,7 @@
 		<Unit filename="include/particle.hpp" />
 		<Unit filename="include/player.hpp" />
 		<Unit filename="include/spritesheet.hpp" />
+		<Unit filename="include/tools.hpp" />
 		<Unit filename="src/blame.cpp" />
 		<Unit filename="src/bullet.cpp" />
 		<Unit filename="src/gameobj.cpp" />
@@ -56,6 +57,7 @@
 		<Unit filename="src/particle.cpp" />
 		<Unit filename="src/player.cpp" />
 		<Unit filename="src/spritesheet.cpp" />
+		<Unit filename="src/tools.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

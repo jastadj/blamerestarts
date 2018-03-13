@@ -12,6 +12,7 @@ Blame::Blame()
     m_TilesSS = NULL;
     m_CurrentLevel = NULL;
     dbg_txt = NULL;
+    m_UISS = NULL;
 
     // default screem dimensions
     m_ScreenWidth = 800;
@@ -44,9 +45,15 @@ bool Blame::init()
     m_Screen->setVerticalSyncEnabled(true);
 
     // init tile sprite sheet
-    const int tilesw = 1;
+    const int tilesw = 4;
     const int tilesh = 1;
     m_TilesSS = new SpriteSheet(".\\data\\art\\tiles.png", tilesw, tilesh);
+
+    // init ui sprite sheet
+    m_UISS = new SpriteSheet(".\\data\\art\\uigfx.png", 2, 1);
+    m_UI_Health_Sprites.push_back( m_UISS->createSprite(0));
+    m_UI_Health_Sprites.push_back( m_UISS->createSprite(1));
+
 
     // create fonts and debug text
     m_Font.loadFromFile(".\\data\\font\\droidsansmono.ttf");
@@ -65,19 +72,31 @@ Tile *Blame::createTile(int tilenum)
 {
     Tile *newtile = new Tile;
 
-    switch(tilenum)
+    if(tilenum >0 && tilenum <= m_TilesSS->getCount())
     {
-    case 1:
         newtile->sprite = m_TilesSS->createSprite(tilenum-1);
         newtile->id = tilenum;
-        break;
-    default:
-        std::cout << "Error creating tile, tilenum " << tilenum << " is not valid.\n";
-    case 0:
+
+        // spikes
+        if(tilenum == 2 || tilenum == 3)
+        {
+            newtile->tiledamage = 1;
+            newtile->blocked = false;
+        }
+        // lava
+        else if(tilenum == 4)
+        {
+            newtile->tiledamage = 2;
+            newtile->blocked = false;
+        }
+    }
+    else
+    {
         newtile->sprite = new sf::Sprite();
         newtile->blocked = false;
         newtile->id = 0;
-        break;
+
+        if(tilenum != 0) std::cout << "Error creating tile, tilenum " << tilenum << " is not valid.\n";
     }
 
     return newtile;
@@ -140,7 +159,7 @@ void Blame::newGame()
     m_ParticleManager->clear();
 
     // create levels
-    m_Levels.push_back(new Level(32,32));
+    m_Levels.push_back(new Level(".\\data\\levels\\level_01.txt"));
     m_CurrentLevel = m_Levels.back();
 
     // start main loop
@@ -246,6 +265,7 @@ void Blame::mainLoop()
 
         // draw hud
         m_Screen->setView( m_Screen->getDefaultView());
+        drawHUD();
         if(m_DebugMode) m_Screen->draw(*dbg_txt);
 
         // render screen
@@ -294,6 +314,28 @@ void Blame::drawRect(sf::FloatRect trect)
 
 }
 
+void Blame::drawHUD()
+{
+    sf::Vector2f healthoffset;
+
+    int pmaxh = m_Player->getMaxHealth();
+    int pcurh = m_Player->getHealth();
+
+    for(int i = 0; i < pmaxh; i++)
+    {
+        if(i < pcurh)
+        {
+            m_UI_Health_Sprites[1]->setPosition( sf::Vector2f(i*32, 0) + healthoffset);
+            m_Screen->draw( *m_UI_Health_Sprites[1]);
+        }
+        else
+        {
+            m_UI_Health_Sprites[0]->setPosition( sf::Vector2f(i*32, 0) + healthoffset);
+            m_Screen->draw( *m_UI_Health_Sprites[0]);
+        }
+    }
+}
+
 Tile *Blame::getMapCollision(GameOBJ *tobj)
 {
     if(!tobj)
@@ -326,6 +368,11 @@ Tile *Blame::getMapCollision(GameOBJ *tobj)
                 {
                     // return this tile
                     return ttile;
+                }
+                // else if player is touching a damaging tile
+                else if(ttile->tiledamage > 0 && tobj == m_Player && ttile->boundingbox.intersects(m_Player->m_BoundingBox) )
+                {
+                    m_Player->takeDamage( ttile->tiledamage );
                 }
             }
 

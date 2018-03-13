@@ -14,6 +14,8 @@ protected:
 
     Blame *m_BlameCallback;
 
+    const sf::Clock m_TimeAlive;
+
     // sprite
     std::vector<sf::Sprite*> m_Sprites;
     int m_SpriteState;
