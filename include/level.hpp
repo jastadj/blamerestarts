@@ -5,6 +5,8 @@
 #include <string>
 #include <SFML\Graphics.hpp>
 
+#include "teleporter.hpp"
+
 #define TILE_SIZE 32
 
 // forward dec
@@ -36,6 +38,9 @@ private:
     unsigned int m_Width;
     unsigned int m_Height;
 
+    Teleporter *m_TeleporterStart;
+    Teleporter *m_TeleporterEnd;
+
     void genLevel();
 
 public:
@@ -47,5 +52,8 @@ public:
 
     Tile *getTile(int x, int y);
     bool setTile(int x, int y, int tilenum);
+
+    sf::Vector2f getStartingPosition();
+
 };
 #endif // CLASS_LEVEL

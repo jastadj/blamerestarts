@@ -318,6 +318,23 @@ void Player::update()
     else m_OnGround = false;
 
 
+    // check for OBJECT collisions
+    std::vector<GameOBJ*> ocol = m_BlameCallback->getObjectCollisions(this);
+
+    if(!ocol.empty())
+    {
+        for(int i = 0; i < int(ocol.size()); i++)
+        {
+            Teleporter *go_teleporter = dynamic_cast<Teleporter*>(ocol[i]);
+
+            // if hitting the end teleporter
+            if(go_teleporter)
+            {
+
+            }
+        }
+
+    }
 
     // debug info
     std::stringstream dbgss;
@@ -514,4 +531,6 @@ bool Player::doRepair()
     m_RepairStartTime = m_TimeAlive.getElapsedTime().asMilliseconds();
 
     m_CurrentHealth = m_MaxHealth;
+
+    std::cout << "Repaired.\n";
 }

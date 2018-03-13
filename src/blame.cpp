@@ -152,16 +152,16 @@ void Blame::newGame()
         delete m_Levels[i];
     m_Levels.clear();
 
-    // init player
-    m_Player = new Player( sf::Vector2f(100,32 * 29) );
-    //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
-
     // clear any existing particles
     m_ParticleManager->clear();
 
     // create levels
     m_Levels.push_back(new Level(".\\data\\levels\\level_01.txt"));
     m_CurrentLevel = m_Levels.back();
+
+    // init player
+    m_Player = new Player( m_CurrentLevel->getStartingPosition() );
+    //if(!registerGameOBJ(m_Player)) {std::cout << "Error registering player game object.\n"; exit(2);}
 
     // start main loop
     mainLoop();
@@ -427,4 +427,21 @@ Tile *Blame::getMapCollision(GameOBJ *tobj)
 
     // all tiles non blocked
     return NULL;
+}
+
+std::vector<GameOBJ*> Blame::getObjectCollisions(GameOBJ *tobj)
+{
+    std::vector<GameOBJ*> ocol;
+
+    if(!tobj) return ocol;
+
+    for(int i = 0; i < int(m_GameObjects.size()); i++)
+    {
+        if(m_GameObjects[i] == tobj) continue;
+
+        if(m_GameObjects[i]->m_BoundingBox.intersects( tobj->m_BoundingBox))
+            ocol.push_back(m_GameObjects[i]);
+    }
+
+    return ocol;
 }

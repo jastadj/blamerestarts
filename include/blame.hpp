@@ -80,6 +80,7 @@ public:
     bool destroyGameOBJ(GameOBJ *tobj);
 
     Tile *getMapCollision(GameOBJ *tobj);
+    std::vector<GameOBJ*> getObjectCollisions(GameOBJ *tobj);
 
     ParticleManager *getParticleManager() { return m_ParticleManager;}
     // if in debug mode, draw this text to the screen

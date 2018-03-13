@@ -28,6 +28,14 @@ Level::Level(unsigned int width, unsigned int height)
     for(int i = 0; i < int(m_Height); i++)
         for(int n = 0; n < int(m_Width); n++) m_Map[i][n] = m_BlameCallback->createTile(0);
 
+    // create teleporters
+    m_TeleporterStart = new Teleporter(TELEPOTER_START);
+    m_TeleporterEnd = new Teleporter(TELEPORTER_END);
+
+    m_BlameCallback->registerGameOBJ(m_TeleporterStart);
+    m_BlameCallback->registerGameOBJ(m_TeleporterEnd);
+
+
     // generate level
     genLevel();
 }
@@ -35,9 +43,6 @@ Level::Level(unsigned int width, unsigned int height)
 Level::Level(std::string levelfile)
 {
     std::ifstream ifile;
-    std::string buf;
-
-    std::vector<std::string> dimcsv;
 
     // get game callback
     m_BlameCallback = Blame::getInstance();
@@ -50,36 +55,88 @@ Level::Level(std::string levelfile)
         exit(4);
     }
 
-    std::cout << "Loading level from file : " << levelfile << " , w:";
+    std::cout << "Loading level from file : " << levelfile << std::endl;
 
-    std::getline(ifile, buf);
 
-    // get dimensions
-    dimcsv = csvParse(buf);
-    m_Width = atoi(dimcsv[0].c_str());
-    m_Height = atoi(dimcsv[1].c_str());
-    std::cout << m_Width << ",h:" << m_Height << std::endl;
 
-    // create 2d array vector
-    m_Map.resize(m_Height);
-    for(int i = 0; i < int(m_Height); i++) m_Map[i].resize(m_Width);
-
-    // zeroize map data
-    for(int i = 0; i < int(m_Height); i++)
-        for(int n = 0; n < int(m_Width); n++) m_Map[i][n] = m_BlameCallback->createTile(0);
+    // create teleporters
+    m_TeleporterStart = new Teleporter(TELEPOTER_START);
+    m_TeleporterEnd = new Teleporter(TELEPORTER_END);
+    m_BlameCallback->registerGameOBJ(m_TeleporterStart);
+    m_BlameCallback->registerGameOBJ(m_TeleporterEnd);
 
     // load map data from CSV
-
-    for(int i = 0; i < m_Height; i++)
+    while(!ifile.eof())
     {
-        std::string lbuf;
+        std::string cmdbuf;
+        std::string opbuf;
+        std::getline(ifile, cmdbuf);
 
-        std::getline(ifile, lbuf);
+        // look for "command"
+        size_t cpos = cmdbuf.find_first_of(':');
 
-        std::vector<std::string> mapline = csvParse(lbuf);
+        // if line in file is a valid command
+        if(cpos != std::string::npos)
+        {
+            // strip op and cmd
+            opbuf = cmdbuf.substr(cpos+1);
+            cmdbuf = cmdbuf.substr(0, cpos+1);
 
-        for(int n = 0; n < m_Width; n++) setTile(n, i, atoi( mapline[n].c_str()) );
+            //std::cout << "cmd=" << cmdbuf << std::endl;
+            //std::cout << "opbuf=" << opbuf << std::endl;
+            //std::cout << "#\n";
+
+            // if cmd is dimensions
+            if(cmdbuf == "DIMS:")
+            {
+                std::vector<std::string> dimcsv;
+
+                // get dimensions
+                dimcsv = csvParse(opbuf);
+                m_Width = atoi(dimcsv[0].c_str());
+                m_Height = atoi(dimcsv[1].c_str());
+
+                std::cout << "Creating level with w:" << m_Width << ", h:" << m_Height << std::endl;
+
+                // create 2d array vector
+                m_Map.resize(m_Height);
+                for(int i = 0; i < int(m_Height); i++) m_Map[i].resize(m_Width);
+
+                // zeroize map data
+                for(int i = 0; i < int(m_Height); i++)
+                    for(int n = 0; n < int(m_Width); n++) m_Map[i][n] = m_BlameCallback->createTile(0);
+
+                // read in following map data
+                for(int i = 0; i < m_Height; i++)
+                {
+                    std::string lbuf;
+                    std::vector<std::string> mapline;
+
+                    std::getline(ifile, lbuf);
+
+                    mapline = csvParse(lbuf);
+
+                    for(int n = 0; n < m_Width; n++) setTile(n, i, atoi( mapline[n].c_str()) );
+                }
+
+            }
+            else if(cmdbuf == "TPSTART:")
+            {
+                std::vector<std::string> pos = csvParse(opbuf);
+                m_TeleporterStart->m_Position = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
+            }
+            else if(cmdbuf == "TPEND:")
+            {
+                std::vector<std::string> pos = csvParse(opbuf);
+                m_TeleporterEnd->m_Position = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
+            }
+            else std::cout << "Unregognized map command!\n";
+
+
+        }
+
     }
+
 
     ifile.close();
 
@@ -90,6 +147,10 @@ Level::~Level()
     // delete all tiles
     for(int i = 0; i < int(m_Height); i++)
         for(int n = 0; n < int(m_Width); n++) delete m_Map[i][n];
+
+    // delete teleporters
+    m_BlameCallback->destroyGameOBJ(m_TeleporterStart);
+    m_BlameCallback->destroyGameOBJ(m_TeleporterEnd);
 }
 
 sf::Vector2i Level::getDims()
@@ -186,4 +247,9 @@ void Level::genLevel()
     setTile(3,8, 1);
     setTile(4,8, 1);
 
+}
+
+sf::Vector2f Level::getStartingPosition()
+{
+    return m_TeleporterStart->m_Position + sf::Vector2f(32,0);
 }
