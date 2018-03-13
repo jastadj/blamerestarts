@@ -38,6 +38,7 @@ private:
     bool m_OnGround;
     float m_JumpForce;
     int m_LookInYAxis; // -1 = down, 0 = normal, 1 = up
+    sf::Vector2f m_CrouchAmount;
 
     // damage and health
     int m_DamageInvincibleTime_ms;

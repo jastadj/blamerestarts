@@ -72,6 +72,7 @@ Player::Player(sf::Vector2f tpos)
     m_OnGround = false;
     m_JumpForce = 4.0f;
     m_LookInYAxis = 0;
+    m_CrouchAmount = sf::Vector2f(0,-7);
 
     // health
     m_MaxHealth = 5;
@@ -354,6 +355,11 @@ void Player::update()
             m_Sprites[TURRET_UP_RIGHT]->setPosition( m_Position - sf::Vector2f(34, 43) );
             m_BarrelExit = m_Position - sf::Vector2f(7,41);
         }
+        else if(m_LookInYAxis == -1)
+        {
+            m_Sprites[TURRET_RIGHT]->setPosition( m_Position - sf::Vector2f(32, 44) - m_CrouchAmount );
+            m_BarrelExit = m_Position - sf::Vector2f(-32,12) - m_CrouchAmount;
+        }
         else
         {
             m_Sprites[TURRET_RIGHT]->setPosition( m_Position - sf::Vector2f(32, 44) );
@@ -369,6 +375,11 @@ void Player::update()
             m_Sprites[TURRET_UP_LEFT]->setPosition(m_Position - sf::Vector2f(34, 43) );
             m_BarrelExit = m_Position - sf::Vector2f(-4,41);
         }
+        else if(m_LookInYAxis == -1)
+        {
+            m_Sprites[TURRET_LEFT]->setPosition(m_Position - sf::Vector2f(34, 44) - m_CrouchAmount );
+            m_BarrelExit = m_Position - sf::Vector2f(32,12) - m_CrouchAmount;
+        }
         else
         {
             m_Sprites[TURRET_LEFT]->setPosition(m_Position - sf::Vector2f(34, 44) );
@@ -378,9 +389,11 @@ void Player::update()
     }
 
     //if(m_TurretPosition > 0 && m_TurretPosition < 1.f)
-        m_Sprites[TURRET_FORWARD]->setPosition( m_Position - sf::Vector2f(32, 44) );
+    if(m_LookInYAxis == -1) m_Sprites[TURRET_FORWARD]->setPosition( m_Position - sf::Vector2f(32, 44) - m_CrouchAmount );
+    else m_Sprites[TURRET_FORWARD]->setPosition( m_Position - sf::Vector2f(32, 44) );
 
-    m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(34, 43) );
+    if(m_LookInYAxis == -1) m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(34, 43) - m_CrouchAmount );
+    else m_Sprites[CHASSIS]->setPosition( m_Position - sf::Vector2f(34, 43) );
     m_Sprites[CHASSIS_UP_LEFT]->setPosition( m_Position - sf::Vector2f(34, 43) );
     m_Sprites[CHASSIS_UP_RIGHT]->setPosition( m_Position - sf::Vector2f(34, 43) );
 
