@@ -8,6 +8,7 @@ levels
 
 3/13
 *** fix level loading transitions
+- implement random keys
 enemies
 - crawler
 - walker/jumper
@@ -24,3 +25,30 @@ powerups
 - polish
 - release
 
+
+A - LEFT
+B - RIGHT
+C - UP
+D - DOWN
+E - SHOOT
+F - JUMP
+G - CHANGE VEHICLE COLOR
+H - GRAPPLING HOOK?
+I - REPAIR
+J - DROP BOMB
+K - PAUSE
+L - SELF DESTRUCT TOGGLE
+M - VEHICLE LIGHT
+N - TURN OFF VEHICLE
+O - DOUBLE SPEED TOGGLE
+P - SLOW BULLET TOGGLE
+Q - 
+R - 
+S - 
+T - 
+U - 
+V - 
+W - 
+X - 
+Y - 
+Z - 

@@ -1,4 +1,4 @@
-This project is for a weekly game jame (weeklygamejam.com) on 3/9/18.
+This project is for a weekly game jam (weeklygamejam.com) on 3/9/18.
 
 The prompt is "what's it do?".
 
