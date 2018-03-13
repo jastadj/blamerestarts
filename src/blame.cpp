@@ -198,9 +198,7 @@ void Blame::mainLoop()
         sf::Event event;
 
         // actively pressed
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) m_Player->m_Drive = 1;
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = -1;
-        else m_Player->m_Drive = 0;
+        if(! sf::Keyboard::isKeyPressed(sf::Keyboard::D) && !sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = 0;
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) m_Player->lookInY(1);
         else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) m_Player->lookInY(-1);
@@ -222,6 +220,19 @@ void Blame::mainLoop()
                 else if(event.key.code == sf::Keyboard::F1) m_DebugMode = !m_DebugMode;
                 else if(event.key.code == sf::Keyboard::Space) m_Player->jump();
                 else if(event.key.code == sf::Keyboard::R) m_Player->doRepair();
+                else if(event.key.code == sf::Keyboard::D) m_Player->m_Drive = 1;
+                else if(event.key.code == sf::Keyboard::A) m_Player->m_Drive = -1;
+            }
+            else if(event.type == sf::Event::KeyReleased)
+            {
+                if(event.key.code == sf::Keyboard::D)
+                {
+                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = -1;
+                }
+                else if(event.key.code == sf::Keyboard::A)
+                {
+                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) m_Player->m_Drive = 1;
+                }
             }
             // if mouse button pressed
             else if(event.type == sf::Event::MouseButtonPressed)
