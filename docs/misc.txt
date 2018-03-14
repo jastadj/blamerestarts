@@ -8,7 +8,7 @@ levels
 
 3/13
 + fix level loading transitions
-- implement random keys
++ implement random keys
 enemies
 - crawler
 - walker/jumper

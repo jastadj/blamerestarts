@@ -49,6 +49,7 @@ private:
 
     // repair
     int m_Repairs;
+    int m_MaxRepairs;
     int32_t m_RepairStartTime;
     int m_RepairMaxTime;
     bool m_IsRepairing;

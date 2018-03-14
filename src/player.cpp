@@ -1,6 +1,7 @@
 #include "player.hpp"
 #include "blame.hpp"
 #include "bullet.hpp"
+#include "repairitem.hpp"
 
 #include <sstream> // debug text
 
@@ -83,6 +84,7 @@ Player::Player(sf::Vector2f tpos)
 
     // repair
     m_Repairs = 1;
+    m_MaxRepairs = 3;
     m_IsRepairing = false;
     m_RepairMaxTime = 1000;
     m_RepairStartTime = 0;
@@ -325,14 +327,26 @@ void Player::update()
 
     if(!ocol.empty())
     {
-        for(int i = 0; i < int(ocol.size()); i++)
+        for(int i = int(ocol.size())-1; i >= 0; i--)
         {
             Teleporter *go_teleporter = dynamic_cast<Teleporter*>(ocol[i]);
+            RepairItem *go_repairitem = dynamic_cast<RepairItem*>(ocol[i]);
 
             // if hitting the end teleporter
             if(go_teleporter)
             {
                 if(go_teleporter->isTeleporterEnd()) m_BlameCallback->triggerEndLevel();
+            }
+            // if hitting repair item
+            else if(go_repairitem)
+            {
+                // if can pick up item, add repair kit and destroy repair item from game
+                if(m_Repairs < m_MaxRepairs)
+                {
+                    m_Repairs++;
+                    m_BlameCallback->destroyGameOBJ(ocol[i]);
+                }
+
             }
         }
 

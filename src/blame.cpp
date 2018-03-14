@@ -265,6 +265,7 @@ int Blame::mainLoop()
                     m_KeyList = getRandomKeys();
                 }
                 else if(event.key.code == sf::Keyboard::Space && m_DebugMode) m_Player->jump();
+                else if(event.key.code == m_KeyList[C_JUMP]) m_Player->jump();
                 else if(event.key.code == m_KeyList[C_REPAIR]) m_Player->doRepair();
                 else if(event.key.code == m_KeyList[C_RIGHT]) m_Player->m_Drive = 1;
                 else if(event.key.code == m_KeyList[C_LEFT]) m_Player->m_Drive = -1;
