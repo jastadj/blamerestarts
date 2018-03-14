@@ -44,6 +44,7 @@
 		<Unit filename="include/blame.hpp" />
 		<Unit filename="include/bullet.hpp" />
 		<Unit filename="include/gameobj.hpp" />
+		<Unit filename="include/keys.hpp" />
 		<Unit filename="include/level.hpp" />
 		<Unit filename="include/particle.hpp" />
 		<Unit filename="include/player.hpp" />

@@ -7,7 +7,7 @@ levels
 - background
 
 3/13
-*** fix level loading transitions
++ fix level loading transitions
 - implement random keys
 enemies
 - crawler

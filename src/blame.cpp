@@ -1,5 +1,7 @@
 #include "blame.hpp"
 
+#include "keys.hpp"
+
 Blame *Blame::m_Instance = NULL;
 
 Blame::Blame()
@@ -145,6 +147,9 @@ void Blame::newGame()
     //  init random seed
     srand( time(NULL));
 
+    // get random keys
+    m_KeyList = getRandomKeys();
+
     // delete all current game objects
     for(int i = 0; i < int(m_GameObjects.size()); i++)
         delete m_GameObjects[i];
@@ -221,6 +226,8 @@ int Blame::mainLoop()
 
     std::cout << "Starting main loop.  " << m_GameObjects.size() << " game objects.\n";
 
+    sf::Keyboard::Key mykey = sf::Keyboard::Escape;
+
     // main game loop
     while(!quit)
     {
@@ -235,8 +242,8 @@ int Blame::mainLoop()
         sf::Event event;
 
         // actively pressed / not pressed
-        if(! sf::Keyboard::isKeyPressed(sf::Keyboard::D) && !sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = 0;
-        if(!sf::Keyboard::isKeyPressed(sf::Keyboard::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::S)) m_Player->lookInY(0);
+        if(!sf::Keyboard::isKeyPressed(m_KeyList[C_RIGHT]) && !sf::Keyboard::isKeyPressed(m_KeyList[C_LEFT]) ) m_Player->m_Drive = 0;
+        if(!sf::Keyboard::isKeyPressed(m_KeyList[C_UP]) && !sf::Keyboard::isKeyPressed(m_KeyList[C_DOWN]) ) m_Player->lookInY(0);
 
 
         // handle all input events
@@ -252,32 +259,37 @@ int Blame::mainLoop()
             {
                 if(event.key.code == sf::Keyboard::Escape) quit = true;
                 else if(m_EndLevelTriggered) break;
-                else if(event.key.code == sf::Keyboard::F1) m_DebugMode = !m_DebugMode;
-                else if(event.key.code == sf::Keyboard::Space) m_Player->jump();
-                else if(event.key.code == sf::Keyboard::R) m_Player->doRepair();
-                else if(event.key.code == sf::Keyboard::D) m_Player->m_Drive = 1;
-                else if(event.key.code == sf::Keyboard::A) m_Player->m_Drive = -1;
-                else if(event.key.code == sf::Keyboard::W) m_Player->lookInY(1);
-                else if(event.key.code == sf::Keyboard::S) m_Player->lookInY(-1);
+                else if(event.key.code == sf::Keyboard::F1)
+                {
+                    m_DebugMode = !m_DebugMode;
+                    m_KeyList = getRandomKeys();
+                }
+                else if(event.key.code == sf::Keyboard::Space && m_DebugMode) m_Player->jump();
+                else if(event.key.code == m_KeyList[C_REPAIR]) m_Player->doRepair();
+                else if(event.key.code == m_KeyList[C_RIGHT]) m_Player->m_Drive = 1;
+                else if(event.key.code == m_KeyList[C_LEFT]) m_Player->m_Drive = -1;
+                else if(event.key.code == m_KeyList[C_UP]) m_Player->lookInY(1);
+                else if(event.key.code == m_KeyList[C_DOWN]) m_Player->lookInY(-1);
+                else if(event.key.code == m_KeyList[C_FIRE]) m_Player->shoot();
             }
             else if(m_EndLevelTriggered) break;
             else if(event.type == sf::Event::KeyReleased)
             {
-                if(event.key.code == sf::Keyboard::D)
+                if(event.key.code == m_KeyList[C_RIGHT])
                 {
-                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) m_Player->m_Drive = -1;
+                    if(sf::Keyboard::isKeyPressed(m_KeyList[C_LEFT])) m_Player->m_Drive = -1;
                 }
-                else if(event.key.code == sf::Keyboard::A)
+                else if(event.key.code == m_KeyList[C_LEFT])
                 {
-                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) m_Player->m_Drive = 1;
+                    if(sf::Keyboard::isKeyPressed(m_KeyList[C_RIGHT])) m_Player->m_Drive = 1;
                 }
-                else if(event.key.code == sf::Keyboard::W)
+                else if(event.key.code == m_KeyList[C_UP])
                 {
-                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) m_Player->lookInY(-1);
+                    if(sf::Keyboard::isKeyPressed(m_KeyList[C_DOWN])) m_Player->lookInY(-1);
                 }
-                else if(event.key.code == sf::Keyboard::S)
+                else if(event.key.code == m_KeyList[C_DOWN])
                 {
-                    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) m_Player->lookInY(1);
+                    if(sf::Keyboard::isKeyPressed(m_KeyList[C_UP])) m_Player->lookInY(1);
                 }
             }
             // if mouse button pressed
@@ -288,7 +300,7 @@ int Blame::mainLoop()
                 {
                     // particle test
                     //p1.createParticle(sf::Vector2f(0,0), sf::Vector2f(1,-0.7));
-                    m_Player->shoot();
+                    if(m_DebugMode) m_Player->shoot();
                 }
             }
         }
@@ -509,4 +521,68 @@ std::vector<GameOBJ*> Blame::getObjectCollisions(GameOBJ *tobj)
 void Blame::triggerEndLevel()
 {
     m_EndLevelTriggered = true;
+}
+
+std::vector<sf::Keyboard::Key> Blame::getRandomKeys()
+{
+    std::vector<sf::Keyboard::Key> keys;
+
+    std::vector<sf::Keyboard::Key> allkeys;
+    allkeys.push_back(sf::Keyboard::A);
+    allkeys.push_back(sf::Keyboard::B);
+    allkeys.push_back(sf::Keyboard::C);
+    allkeys.push_back(sf::Keyboard::D);
+    allkeys.push_back(sf::Keyboard::E);
+    allkeys.push_back(sf::Keyboard::F);
+    allkeys.push_back(sf::Keyboard::G);
+    allkeys.push_back(sf::Keyboard::H);
+    allkeys.push_back(sf::Keyboard::I);
+    allkeys.push_back(sf::Keyboard::J);
+    allkeys.push_back(sf::Keyboard::K);
+    allkeys.push_back(sf::Keyboard::L);
+    allkeys.push_back(sf::Keyboard::M);
+    allkeys.push_back(sf::Keyboard::N);
+    allkeys.push_back(sf::Keyboard::O);
+    allkeys.push_back(sf::Keyboard::P);
+    allkeys.push_back(sf::Keyboard::Q);
+    allkeys.push_back(sf::Keyboard::R);
+    allkeys.push_back(sf::Keyboard::S);
+    allkeys.push_back(sf::Keyboard::T);
+    allkeys.push_back(sf::Keyboard::U);
+    allkeys.push_back(sf::Keyboard::V);
+    allkeys.push_back(sf::Keyboard::W);
+    allkeys.push_back(sf::Keyboard::X);
+    allkeys.push_back(sf::Keyboard::Y);
+    allkeys.push_back(sf::Keyboard::Z);
+
+    if(m_DebugMode)
+    {
+        keys.resize(C_TOTAL);
+
+        // WASD
+        keys[C_UP] = sf::Keyboard::W;
+        keys[C_DOWN] = sf::Keyboard::S;
+        keys[C_LEFT] = sf::Keyboard::A;
+        keys[C_RIGHT] = sf::Keyboard::D;
+
+        keys[C_REPAIR] = sf::Keyboard::R;
+    }
+    else
+    {
+        // get a key for each key command
+        for(int i = 0; i < C_TOTAL; i++)
+        {
+            // get random key from remaining keys
+            int tkey = rand()%int(allkeys.size());
+
+            // put that key into new random key list
+            keys.push_back(allkeys[tkey]);
+
+            // remove that key from the master key list so it can't be picked again
+            allkeys.erase(allkeys.begin() + tkey);
+        }
+    }
+
+
+    return keys;
 }

@@ -23,6 +23,7 @@ private:
 
     bool init();
     bool m_DebugMode;
+    std::vector<sf::Keyboard::Key> getRandomKeys();
 
     // assets
     SpriteSheet *m_TilesSS;
@@ -40,6 +41,7 @@ private:
     std::vector<Level*> m_Levels;
     Level *m_CurrentLevel;
     bool m_EndLevelTriggered;
+    std::vector<sf::Keyboard::Key> m_KeyList;
 
 
     // render window
