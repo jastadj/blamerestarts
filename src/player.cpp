@@ -2,6 +2,7 @@
 #include "blame.hpp"
 #include "bullet.hpp"
 #include "repairitem.hpp"
+#include "drone.hpp"
 
 #include <sstream> // debug text
 
@@ -331,6 +332,7 @@ void Player::update()
         {
             Teleporter *go_teleporter = dynamic_cast<Teleporter*>(ocol[i]);
             RepairItem *go_repairitem = dynamic_cast<RepairItem*>(ocol[i]);
+            Drone *go_drone = dynamic_cast<Drone*>(ocol[i]);
 
             // if hitting the end teleporter
             if(go_teleporter)
@@ -347,6 +349,11 @@ void Player::update()
                     m_BlameCallback->destroyGameOBJ(ocol[i]);
                 }
 
+            }
+            // else if colliding with a drone
+            else if(go_drone)
+            {
+                takeDamage(1);
             }
         }
 

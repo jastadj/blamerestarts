@@ -82,6 +82,8 @@ public:
     bool registerGameOBJ(GameOBJ *tobj);
     bool destroyGameOBJ(GameOBJ *tobj);
 
+    sf::Vector2f getPlayerPosition() { return m_Player->m_Position;}
+
     Tile *getMapCollision(GameOBJ *tobj);
     std::vector<GameOBJ*> getObjectCollisions(GameOBJ *tobj);
 

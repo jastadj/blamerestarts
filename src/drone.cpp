@@ -2,6 +2,8 @@
 #include "blame.hpp"
 #include "bullet.hpp"
 
+#include "tools.hpp"
+
 SpriteSheet *Drone::m_DroneSS = new SpriteSheet(".\\data\\art\\drone.png",1,1);
 
 Drone::Drone(sf::Vector2f spos)
@@ -17,7 +19,10 @@ Drone::Drone(sf::Vector2f spos)
     m_BoundingBoxOffset.y = 6;
 
     m_Speed = 0.08;
+    m_BulletSpeed = 1.0;
     m_MovingRight = rand()%2;
+    m_FireCooldown = 500;
+    m_FireRange = 1000;
 
     m_CurHealth = 4;
 }
@@ -26,6 +31,28 @@ Drone::~Drone()
 {
 
 }
+
+float Drone::getRangeToPlayer()
+{
+    // get vector to player
+    sf::Vector2f vtop(m_BlameCallback->getPlayerPosition() - m_Position);
+
+    // return magnitude of vector (range)
+    return getMagnitude(vtop);
+}
+
+void Drone::shoot()
+{
+    // get vector to player
+    sf::Vector2f tvel = normalizeVector(m_BlameCallback->getPlayerPosition() - m_Position);
+    tvel = tvel * m_BulletSpeed;
+
+    // fire at player
+    Bullet_Drone *newbullet = new Bullet_Drone(m_Position + sf::Vector2f(16,16), tvel);
+
+
+}
+
 
 void Drone::update()
 {
@@ -74,9 +101,12 @@ void Drone::update()
     for(int i = 0; i < int(ocol.size()); i++)
     {
         Bullet *bul = dynamic_cast<Bullet*>(ocol[i]);
+        Bullet_Drone *bul_drone = dynamic_cast<Bullet_Drone*>(ocol[i]);
 
+        // ignore drone bullets
+        if(bul_drone) continue;
         // collided with bullet
-        if(bul)
+        else if(bul)
         {
             // take damage from bullet
             m_CurHealth--;
@@ -97,6 +127,18 @@ void Drone::update()
     m_Sprites[0]->setPosition(m_Position);
     m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
     m_BoundingBox.top = m_Position.y + m_BoundingBoxOffset.y;
+
+    // if able to fire, fire at player
+    if(m_FireClock.getElapsedTime().asMilliseconds() > double(m_FireCooldown) )
+    {
+        // if player is in range, shoot
+        if(getRangeToPlayer() < m_FireRange )
+        {
+            shoot();
+            m_FireClock.restart();
+        }
+
+    }
 }
 
 void Drone::draw(sf::RenderTarget *tscreen)

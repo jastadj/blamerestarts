@@ -13,7 +13,14 @@ private:
 
     sf::Vector2f m_Vel;
     float m_Speed;
+    float m_BulletSpeed;
     bool m_MovingRight;
+
+    int m_FireCooldown;
+    sf::Clock m_FireClock;
+    float m_FireRange;
+    void shoot();
+    float getRangeToPlayer();
 
 public:
     Drone(sf::Vector2f spos);

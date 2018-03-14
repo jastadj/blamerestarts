@@ -6,7 +6,7 @@
 
 class Bullet: public GameOBJ
 {
-private:
+protected:
 
     static SpriteSheet *m_BulletSS;
 
@@ -15,7 +15,7 @@ private:
 
 public:
     Bullet(sf::Vector2f tpos, sf::Vector2f tdir);
-    ~Bullet();
+    virtual ~Bullet();
 
     void update();
     void draw(sf::RenderTarget *tscreen);
@@ -23,4 +23,15 @@ public:
     float m_BulletSpeed;
 
 };
+
+class Bullet_Drone:public Bullet
+{
+private:
+
+public:
+    Bullet_Drone(sf::Vector2f tpos, sf::Vector2f tdir);
+    ~Bullet_Drone();
+};
+
+
 #endif // CLASS_BULLET

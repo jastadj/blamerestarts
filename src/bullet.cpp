@@ -110,3 +110,15 @@ void Bullet::draw(sf::RenderTarget *tscreen)
 {
     tscreen->draw(*m_Sprites[0]);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+Bullet_Drone::Bullet_Drone(sf::Vector2f tpos, sf::Vector2f tdir):Bullet(tpos,tdir)
+{
+
+}
+
+Bullet_Drone::~Bullet_Drone()
+{
+
+}
