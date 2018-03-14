@@ -169,10 +169,10 @@ void Blame::newGame()
 
     // start first level
     m_CurrentLevel->startLevel();
-    mainLoop();
+    int returnmode = mainLoop();
 
     // next level
-    while(1)
+    while(returnmode != 0)
     {
 
         std::cout << "Finding next level...\n";
@@ -197,12 +197,12 @@ void Blame::newGame()
         m_CurrentLevel->startLevel();
 
         // start game loop
-        mainLoop();
+        returnmode = mainLoop();
     }
 
 }
 
-void Blame::mainLoop()
+int Blame::mainLoop()
 {
     bool quit = false;
 
@@ -346,6 +346,22 @@ void Blame::mainLoop()
 
     // cleanup level
     m_CurrentLevel->endLevel();
+
+    // delete all game objects except player
+    for(int i = 0; i < int(m_GameObjects.size()); i++)
+    {
+        if(m_GameObjects[i] == m_Player) m_GameObjects[i] = NULL;
+        else destroyGameOBJ(m_GameObjects[i]);
+    }
+    // clear entire list
+    m_GameObjects.clear();
+    // add player back into list
+    m_GameObjects.push_back(m_Player);
+
+    // if player quit manually
+    if(!m_EndLevelTriggered) return 0;
+    // else
+    return 1;
 
 }
 

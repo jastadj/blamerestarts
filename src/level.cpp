@@ -31,11 +31,10 @@ Level::Level(unsigned int width, unsigned int height)
         for(int n = 0; n < int(m_Width); n++) m_Map[i][n] = m_BlameCallback->createTile(0);
 
     // create teleporters
-    m_TeleporterStart = new Teleporter(TELEPOTER_START);
-    m_TeleporterEnd = new Teleporter(TELEPORTER_END);
-
-    m_BlameCallback->registerGameOBJ(m_TeleporterStart);
-    m_BlameCallback->registerGameOBJ(m_TeleporterEnd);
+    //m_TeleporterStart = new Teleporter(TELEPORTER_START);
+    //m_TeleporterEnd = new Teleporter(TELEPORTER_END);
+    //m_BlameCallback->registerGameOBJ(m_TeleporterStart);
+    //m_BlameCallback->registerGameOBJ(m_TeleporterEnd);
 
 
     // generate level
@@ -58,14 +57,6 @@ Level::Level(std::string levelfile)
     }
 
     std::cout << "Loading level from file : " << levelfile << std::endl;
-
-
-
-    // create teleporters
-    m_TeleporterStart = new Teleporter(TELEPOTER_START);
-    m_TeleporterEnd = new Teleporter(TELEPORTER_END);
-    m_ObjectsToInit.push_back(m_TeleporterStart);
-    m_ObjectsToInit.push_back(m_TeleporterEnd);
 
     // load map data from CSV
     while(!ifile.eof())
@@ -125,19 +116,17 @@ Level::Level(std::string levelfile)
             else if(cmdbuf == "TPSTART:")
             {
                 std::vector<std::string> pos = csvParse(opbuf);
-                m_TeleporterStart->m_Position = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
+                m_TeleporterStartPos = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
             }
             else if(cmdbuf == "TPEND:")
             {
                 std::vector<std::string> pos = csvParse(opbuf);
-                m_TeleporterEnd->m_Position = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
+                m_TeleporterEndPos = sf::Vector2f( atoi(pos[0].c_str()) * TILE_SIZE, atoi(pos[1].c_str()) * TILE_SIZE);
             }
             else if(cmdbuf == "REPAIRITEM:")
             {
                 std::vector<std::string> pos = csvParse(opbuf);
-                RepairItem *newrepairitem = new RepairItem();
-                newrepairitem->m_Position = sf::Vector2f( atof(pos[0].c_str())*TILE_SIZE, atof(pos[1].c_str())*TILE_SIZE);
-                m_ObjectsToInit.push_back(newrepairitem);
+                m_SpawnRepairItems.push_back(sf::Vector2f( atof(pos[0].c_str())*TILE_SIZE, atof(pos[1].c_str())*TILE_SIZE));
             }
             else std::cout << "Unregognized map command!\n";
 
@@ -157,21 +146,32 @@ Level::~Level()
     for(int i = 0; i < int(m_Height); i++)
         for(int n = 0; n < int(m_Width); n++) delete m_Map[i][n];
 
-    // delete teleporters
-    m_BlameCallback->destroyGameOBJ(m_TeleporterStart);
-    m_BlameCallback->destroyGameOBJ(m_TeleporterEnd);
 }
 
 void Level::startLevel()
 {
-    // init objects in que to be registered
+    // create and register items
 
-    for(int i = 0; i < int(m_ObjectsToInit.size()); i++)
+    // note : register game objs not necessary, automatic upon creation
+
+    // create and register teleports
+    Teleporter *newstarttp = new Teleporter(TELEPORTER_START);
+    newstarttp->m_Position = m_TeleporterStartPos;
+    //m_BlameCallback->registerGameOBJ(newstarttp);
+
+    Teleporter *newendtp = new Teleporter(TELEPORTER_END);
+    newendtp->m_Position = m_TeleporterEndPos;
+    //m_BlameCallback->registerGameOBJ(newendtp);
+
+    // create and register repair items
+    for(int i = 0; i < int(m_SpawnRepairItems.size()); i++)
     {
-        m_BlameCallback->registerGameOBJ(m_ObjectsToInit[i]);
+        RepairItem *newrepair = new RepairItem();
+        newrepair->m_Position = m_SpawnRepairItems[i];
+        //m_BlameCallback->registerGameOBJ(newrepair);
     }
 
-    m_ObjectsToInit.clear();
+
 }
 
 void Level::endLevel()
@@ -277,5 +277,5 @@ void Level::genLevel()
 
 sf::Vector2f Level::getStartingPosition()
 {
-    return m_TeleporterStart->m_Position + sf::Vector2f(32,0);
+    return m_TeleporterStartPos;
 }

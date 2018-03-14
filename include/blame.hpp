@@ -51,7 +51,7 @@ private:
 
     // main loop
     void newGame();
-    void mainLoop();
+    int mainLoop();
 
     // draw
     void drawLevel();

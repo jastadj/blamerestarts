@@ -4,7 +4,7 @@
 #include "gameobj.hpp"
 #include "spritesheet.hpp"
 
-enum TELE_TYPE{TELEPOTER_START, TELEPORTER_END};
+enum TELE_TYPE{TELEPORTER_START, TELEPORTER_END};
 
 class Teleporter:public GameOBJ
 {

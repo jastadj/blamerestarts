@@ -39,8 +39,11 @@ private:
     unsigned int m_Width;
     unsigned int m_Height;
 
-    Teleporter *m_TeleporterStart;
-    Teleporter *m_TeleporterEnd;
+    sf::Vector2f m_TeleporterStartPos;
+    sf::Vector2f m_TeleporterEndPos;
+
+    // spawn lists
+    std::vector<sf::Vector2f> m_SpawnRepairItems;
 
     void genLevel();
 
