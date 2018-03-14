@@ -7,6 +7,8 @@ class Enemy:public GameOBJ
 {
 protected:
 
+    int m_CurHealth;
+
 public:
     Enemy();
     ~Enemy();

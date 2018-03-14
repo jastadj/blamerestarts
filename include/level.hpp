@@ -44,6 +44,7 @@ private:
 
     // spawn lists
     std::vector<sf::Vector2f> m_SpawnRepairItems;
+    std::vector<sf::Vector2f> m_SpawnDrones;
 
     void genLevel();
 

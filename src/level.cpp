@@ -7,7 +7,8 @@
 
 #include "tools.hpp"
 
-#include "repairitem.hpp"ddd
+#include "repairitem.hpp"
+#include "drone.hpp"
 
 Level::Level(unsigned int width, unsigned int height)
 {
@@ -128,6 +129,11 @@ Level::Level(std::string levelfile)
                 std::vector<std::string> pos = csvParse(opbuf);
                 m_SpawnRepairItems.push_back(sf::Vector2f( atof(pos[0].c_str())*TILE_SIZE, atof(pos[1].c_str())*TILE_SIZE));
             }
+            else if(cmdbuf == "DRONE:")
+            {
+                std::vector<std::string> pos = csvParse(opbuf);
+                m_SpawnDrones.push_back(sf::Vector2f( atof(pos[0].c_str())*TILE_SIZE, atof(pos[1].c_str())*TILE_SIZE));
+            }
             else std::cout << "Unregognized map command!\n";
 
 
@@ -169,6 +175,12 @@ void Level::startLevel()
         RepairItem *newrepair = new RepairItem();
         newrepair->m_Position = m_SpawnRepairItems[i];
         //m_BlameCallback->registerGameOBJ(newrepair);
+    }
+
+    // create and spawn drones
+    for(int i = 0; i < int(m_SpawnDrones.size()); i++)
+    {
+        Drone *newdrone = new Drone(m_SpawnDrones[i]);
     }
 
 
