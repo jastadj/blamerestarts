@@ -36,6 +36,14 @@ Blame::~Blame()
 
 }
 
+void Blame::toggleDebugMode()
+{
+#ifdef DEBUG
+    m_DebugMode = !m_DebugMode;
+    m_KeyList = getRandomKeys();
+#endif
+}
+
 bool Blame::init()
 {
     // init render window
@@ -374,11 +382,7 @@ int Blame::mainLoop()
             {
                 if(event.key.code == sf::Keyboard::Escape) quit = true;
                 else if(m_EndLevelTriggered) break;
-                else if(event.key.code == sf::Keyboard::F1)
-                {
-                    m_DebugMode = !m_DebugMode;
-                    m_KeyList = getRandomKeys();
-                }
+                else if(event.key.code == sf::Keyboard::F1) toggleDebugMode();
                 else if(event.key.code == sf::Keyboard::Space && m_DebugMode) m_Player->jump();
                 else if(event.key.code == m_KeyList[C_JUMP] && !m_DebugMode) m_Player->jump();
                 else if(event.key.code == m_KeyList[C_REPAIR]) m_Player->doRepair();
