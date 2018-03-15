@@ -276,7 +276,7 @@ void Player::update()
         else if(m_Vel.x < 0)
         {
             // push out to just touch the surface
-            m_Position.x += (coltile->boundingbox.left + coltile->boundingbox.width) - m_BoundingBox.left;
+            m_Position.x += (coltile->boundingbox.left + coltile->boundingbox.width) - m_BoundingBox.left + 0.1;
             m_BoundingBox.left = m_Position.x + m_BoundingBoxOffset.x;
         }
     }
