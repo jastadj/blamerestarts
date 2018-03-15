@@ -7,10 +7,13 @@
 #include <time.h>
 
 #include <SFML\Graphics.hpp>
+#include <SFML\Audio.hpp>
 #include "spritesheet.hpp"
 #include "particle.hpp"
 #include "player.hpp"
 #include "level.hpp"
+
+enum SOUNDS{SOUND_REPAIR, SOUND_TELE, SOUND_START, SOUND_LAND, SOUND_SHOOT, SOUND_DEATH};
 
 class Blame
 {
@@ -22,6 +25,7 @@ private:
     static Blame *m_Instance;
 
     bool init();
+    int m_GameMode;
     bool m_DebugMode;
     std::vector<sf::Keyboard::Key> getRandomKeys();
 
@@ -32,6 +36,9 @@ private:
     SpriteSheet *m_UISS;
     std::vector< sf::Sprite* > m_UI_Health_Sprites;
     sf::Sprite *m_UI_Repair_Sprite;
+    std::vector<sf::Texture> m_TitleTextures;
+    std::vector<sf::SoundBuffer> m_Sounds;
+    std::vector<sf::Sound*> m_SoundQue;
 
 
     // game data
@@ -52,13 +59,17 @@ private:
     double m_DeltaTime;
 
     // main loop
+    void titleLoop();
     void newGame();
     int mainLoop();
 
     // draw
+    void showMessage(std::string msg, sf::Color mcolor);
     void drawLevel();
     void drawRect(sf::FloatRect trect);
     void drawHUD();
+
+    enum GAMEMODE{TITLESCREEN, NEWGAME, GAME, DEAD, QUIT};
 
 public:
     // get singleton
@@ -91,7 +102,11 @@ public:
 
     void triggerEndLevel();
 
+    sf::Sound *playSound(int soundindex);
+    void clearSoundQue();
+
     // if in debug mode, draw this text to the screen
     sf::Text *dbg_txt;
+
 };
 #endif // CLASS_BLAME

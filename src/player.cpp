@@ -139,6 +139,8 @@ void Player::shoot()
     // else if turret is facing to the left
     else newbullet = new Bullet(m_BarrelExit, sf::Vector2f( -1, 0 ) );
 
+    m_BlameCallback->playSound(SOUND_SHOOT);
+
 }
 
 void Player::jump()
@@ -333,6 +335,7 @@ void Player::update()
             Teleporter *go_teleporter = dynamic_cast<Teleporter*>(ocol[i]);
             RepairItem *go_repairitem = dynamic_cast<RepairItem*>(ocol[i]);
             Drone *go_drone = dynamic_cast<Drone*>(ocol[i]);
+            Bullet_Drone *go_bul_drone = dynamic_cast<Bullet_Drone*>(ocol[i]);
 
             // if hitting the end teleporter
             if(go_teleporter)
@@ -352,6 +355,10 @@ void Player::update()
             }
             // else if colliding with a drone
             else if(go_drone)
+            {
+                takeDamage(1);
+            }
+            else if(go_bul_drone)
             {
                 takeDamage(1);
             }
@@ -554,6 +561,8 @@ bool Player::doRepair()
     m_RepairStartTime = m_TimeAlive.getElapsedTime().asMilliseconds();
 
     m_CurrentHealth = m_MaxHealth;
+
+    m_BlameCallback->playSound(SOUND_REPAIR);
 
     std::cout << "Repaired.\n";
 }

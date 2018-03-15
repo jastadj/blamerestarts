@@ -25,6 +25,7 @@ Blame::Blame()
     m_Instance = this;
     m_DebugMode = false;
     m_EndLevelTriggered = false;
+    m_GameMode = TITLESCREEN;
 
     init();
 
@@ -68,8 +69,31 @@ bool Blame::init()
     // create particle manager
     m_ParticleManager = new ParticleManager;
 
-    // start new game
-    newGame();
+    // load title textures
+    m_TitleTextures.push_back(sf::Texture());
+    m_TitleTextures.back().loadFromFile(".\\data\\art\\title.png");
+
+    // load sounds
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\healsound.wav");
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\tele.wav");
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\start.ogg");
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\land.wav");
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\shoot.ogg");
+    m_Sounds.push_back(sf::SoundBuffer());
+    m_Sounds.back().loadFromFile(".\\data\\sounds\\death.ogg");
+
+    while(1)
+    {
+        if(m_GameMode == TITLESCREEN) titleLoop();
+        else if(m_GameMode == NEWGAME) newGame();
+        else if(m_GameMode == QUIT) break;
+    }
+
 
     return true;
 }
@@ -174,16 +198,21 @@ void Blame::newGame()
 
     // start first level
     m_CurrentLevel->startLevel();
+    showMessage("Controls are randomized A-Z.", sf::Color::White);
     int returnmode = mainLoop();
 
     // next level
-    while(returnmode != 0)
+    while(returnmode != 0 && returnmode != 2)
     {
 
         std::cout << "Finding next level...\n";
 
         m_EndLevelTriggered = false;
-        if(m_CurrentLevel == m_Levels.back()) return;
+        if(m_CurrentLevel == m_Levels.back())
+        {
+            showMessage("YOU WIN!", sf::Color::Green);
+            break;
+        }
 
         // find next level
         for(int i = 0; i < int(m_Levels.size()); i++)
@@ -205,11 +234,93 @@ void Blame::newGame()
         returnmode = mainLoop();
     }
 
+    m_GameMode = TITLESCREEN;
+
+}
+
+void Blame::titleLoop()
+{
+    bool quit = false;
+
+    m_Screen->setView(m_Screen->getDefaultView());
+
+    sf::Sprite tsprite(m_TitleTextures[0]);
+
+    sf::Text newgametxt("New Game", m_Font, 22);
+    newgametxt.setOrigin(newgametxt.getLocalBounds().width/2, newgametxt.getLocalBounds().height/2);
+    newgametxt.setPosition(m_ScreenWidth/2, 400);
+    newgametxt.setScale(2.f, 2.f);
+
+    sf::Text quittxt("Quit", m_Font, 22);
+    quittxt.setOrigin(quittxt.getLocalBounds().width/2, quittxt.getLocalBounds().height/2);
+    quittxt.setPosition(m_ScreenWidth/2, 480);
+    quittxt.setScale(2.f, 2.f);
+
+    while(!quit)
+    {
+
+        // clear screen
+        m_Screen->clear(sf::Color(0x0b,0x48,0xf4));
+
+        sf::Event event;
+
+        sf::Vector2f mousePos = sf::Vector2f(sf::Mouse::getPosition(*m_Screen));;
+
+        while(m_Screen->pollEvent(event))
+        {
+            if(event.type == sf::Event::Closed) quit = true;
+            else if(event.type == sf::Event::KeyPressed)
+            {
+                if(event.key.code == sf::Keyboard::Escape) quit = true;
+            }
+            else if(event.type == sf::Event::MouseButtonPressed)
+            {
+                if(event.mouseButton.button == sf::Mouse::Left)
+                {
+                    if(newgametxt.getGlobalBounds().contains(mousePos))
+                    {
+                        m_GameMode = NEWGAME;
+                        quit = true;
+                    }
+
+                    if(quittxt.getGlobalBounds().contains(mousePos))
+                    {
+                        m_GameMode = QUIT;
+                        quit = true;
+                    }
+                }
+            }
+        }
+
+        // update
+        // if mouse is inside newgame text
+        if(newgametxt.getGlobalBounds().contains(mousePos))
+        {
+            newgametxt.setColor(sf::Color::Yellow);
+        }
+        else newgametxt.setColor(sf::Color::White);
+
+        if(quittxt.getGlobalBounds().contains(mousePos))
+        {
+            quittxt.setColor(sf::Color::Yellow);
+        }
+        else quittxt.setColor(sf::Color::White);
+
+        // draw
+        m_Screen->draw(tsprite);
+        m_Screen->draw(newgametxt);
+        m_Screen->draw(quittxt);
+
+        // show screen
+        m_Screen->display();
+
+    }
 }
 
 int Blame::mainLoop()
 {
     bool quit = false;
+    bool playerdead = false;
 
     /*
     ParticleEmitter p1(m_ParticleManager, PEMIT_CUSTOM, sf::Vector2f( 400, 300) );
@@ -219,6 +330,8 @@ int Blame::mainLoop()
     p1.m_custom_accel = sf::Vector2f(0, 0.05);
     */
 
+    clearSoundQue();
+
     // register player
     registerGameOBJ(m_Player);
 
@@ -227,6 +340,8 @@ int Blame::mainLoop()
     std::cout << "Starting main loop.  " << m_GameObjects.size() << " game objects.\n";
 
     sf::Keyboard::Key mykey = sf::Keyboard::Escape;
+
+    playSound(SOUND_TELE);
 
     // main game loop
     while(!quit)
@@ -318,6 +433,14 @@ int Blame::mainLoop()
             if(!m_EndLevelTriggered) m_GameObjects[i]->update();
         }
 
+        // if player is dead
+        if(m_Player->getHealth() <= 0)
+        {
+            playSound(SOUND_DEATH);
+            playerdead = true;
+            quit = true;
+        }
+
         // update view
         m_View.setCenter(m_Player->m_Position);
         m_Screen->setView(m_View);
@@ -372,9 +495,14 @@ int Blame::mainLoop()
     m_GameObjects.push_back(m_Player);
 
     // if player quit manually
-    if(!m_EndLevelTriggered) return 0;
+    if(m_EndLevelTriggered) return 1;
     // else
-    return 1;
+    else if(playerdead)
+    {
+        showMessage("YOU DIED", sf::Color::Red);
+        return 2;
+    }
+    else return 0;
 
 }
 
@@ -586,4 +714,73 @@ std::vector<sf::Keyboard::Key> Blame::getRandomKeys()
 
 
     return keys;
+}
+
+void Blame::showMessage(std::string msg, sf::Color mcolor)
+{
+    bool quit = false;
+
+    sf::Text msgtxt(msg, m_Font, 18);
+    msgtxt.setColor(mcolor);
+    msgtxt.setOrigin(msgtxt.getLocalBounds().width/2, msgtxt.getLocalBounds().height/2);
+    msgtxt.setPosition(m_ScreenWidth/2, 300);
+
+    sf::Text clicktxt("(click to continue...)", m_Font, 15);
+    clicktxt.setColor(mcolor);
+    clicktxt.setOrigin(clicktxt.getLocalBounds().width/2, clicktxt.getLocalBounds().height/2);
+    clicktxt.setPosition(m_ScreenWidth/2, 500);
+
+
+
+
+
+    while(!quit)
+    {
+        m_Screen->clear();
+
+        sf::Event event;
+
+        while(m_Screen->pollEvent(event))
+        {
+            if(event.type == sf::Event::Closed) exit(0);
+            else if(event.type == sf::Event::MouseButtonPressed) quit = true;
+            else if(event.type == sf::Event::KeyPressed)
+            {
+                if(event.key.code == sf::Keyboard::Escape) quit = true;
+                else if(event.key.code == sf::Keyboard::Return) quit = true;
+            }
+        }
+
+        //
+        m_Screen->draw(msgtxt);
+        m_Screen->draw(clicktxt);
+
+        m_Screen->display();
+    }
+}
+
+sf::Sound *Blame::playSound(int soundindex)
+{
+    if(soundindex < 0 || soundindex >= int(m_Sounds.size()) ) return NULL;
+
+    sf::Sound *newsound = new sf::Sound(m_Sounds[soundindex]);
+
+    if(!newsound) return NULL;
+
+    newsound->play();
+    m_SoundQue.push_back(newsound);
+}
+
+void Blame::clearSoundQue()
+{
+    for(int i = 0; i < int(m_SoundQue.size()); i++)
+    {
+        if(m_SoundQue[i])
+        {
+            m_SoundQue[i]->stop();
+            delete m_SoundQue[i];
+        }
+    }
+
+    m_SoundQue.clear();
 }
