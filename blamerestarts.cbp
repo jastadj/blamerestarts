@@ -59,6 +59,9 @@
 		<Linker>
 			<Add directory="../../SFML-2.4.2/lib" />
 		</Linker>
+		<ExtraCommands>
+			<Add after="postbuild.bat" />
+		</ExtraCommands>
 		<Unit filename="include/blame.hpp" />
 		<Unit filename="include/bullet.hpp" />
 		<Unit filename="include/drone.hpp" />
